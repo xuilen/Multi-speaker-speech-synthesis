@@ -11,43 +11,7 @@ silent：离线占位静音音频生成，便于快速测试完整数据流及�
 健壮工程特性：支持速率限制（Rate Limiting）、指数退避重试、多任务并发合成以及基于文件哈希的断点续传机制。
 音频后期润色：支持依据标点动态调整停顿、音频交叉淡入淡出（Crossfade）以及背景音乐（BGM）铺底混合。
 系统架构与目录结构
-xiaoshuo/
-├── .env.example                 # 环境变量配置示例模板（API Key、Endpoint 等）
-├── .gitignore                   # Git 忽略文件配置
-├── cache/                       # 角色与系统全局缓存目录
-│   └── characters.json          # 自动生成的角色与音色映射缓存表
-├── documents/                   # 原始文档与测试小说资源
-│   └── sanguoyanyi.epub         # 示例小说（如三国演义等）
-├── novel_tts_system/            # 核心系统代码包
-│   ├── __init__.py
-│   ├── config.py                # 全局配置管理（加载环境变量、默认参数）
-│   ├── schemas.py               # 数据结构与 Pydantic 模型定义
-│   ├── main.py                  # 系统主执行入口
-│   ├── requirements.txt         # 项目 Python 依赖清单
-│   ├── processor/               # 文本与语义处理模块
-│   │   ├── __init__.py
-│   │   ├── epub_reader.py       # EPUB 电子书解析与章节提取
-│   │   ├── chunker.py           # 文本分块与滑窗切片
-│   │   ├── extractor.py         # LLM 驱动的人物对话与情节提取
-│   │   ├── character_registry.py# 角色花名册与音色注册管理
-│   │   ├── character_planner.py # 角色规划与音色自动匹配策略
-│   │   └── context_memory.py    # 长上下文剧情记忆维护
-│   ├── tts/                     # 语音合成模块
-│   │   ├── __init__.py
-│   │   ├── providers.py         # TTS 服务提供商接口抽象
-│   │   ├── azure_synth.py       # Azure Speech 语音合成实现
-│   │   ├── ssml_builder.py      # SSML 标签构建与格式化器
-│   │   └── progress.py          # 批处理合成进度条与状态跟踪
-│   ├── audio/                   # 音频后处理模块
-│   │   ├── __init__.py
-│   │   └── merger.py            # 音频切片无缝合并与格式转换
-│   └── utils/                   # 工具类库
-│       ├── __init__.py
-│       └── retry.py             # 网络请求与合成重试装饰器
-└── output/                      # 生成产物输出目录
-    ├── chunks/                  # 各分段合成音频片段 (*.wav)
-    ├── ssml/                    # 各分段中间产物 SSML 文件 (*.ssml)
-    └── extraction_manifest.json # 文本提取元数据清单
+Overall Architecture
 
 
 环境配置
@@ -353,40 +317,9 @@ The pure frontend single-page app lives in `web_app/index.html`. Open it directl
 - [novel_tts_system/tts/azure_synth.py](novel_tts_system/tts/azure_synth.py): Azure batch synthesis
 - [novel_tts_system/audio/merger.py](novel_tts_system/audio/merger.py): merge, trim, normalize
 
+Overall Architecture
+<img width="322" height="494" alt="image" src="https://github.com/user-attachments/assets/0d22818d-a1b3-4dd6-8c96-aa00b4d78a98" />
 
-
-xiaoshuo/
-├── novel_tts_system/               # 核心系统代码库
-│   ├── audio/                      # 音频处理与合成
-│   │   └── merger.py               # 分段音频拼接与最终导出
-│   ├── processor/                  # 文本解析与角色处理核心
-│   │   ├── character_planner.py    # 角色音色分配与规划策略
-│   │   ├── character_registry.py   # 角色库注册与管理
-│   │   ├── chunker.py              # 长文本分块与章节切分
-│   │   ├── context_memory.py       # 上下文记忆与多轮对话追踪
-│   │   └── extractor.py            # LLM 角色对话与旁白提取器
-│   ├── tts/                        # TTS 适配层
-│   │   ├── azure_synth.py          # Azure TTS 引擎驱动
-│   │   ├── progress.py             # 任务进度跟踪
-│   │   ├── providers.py            # 语音供应商接口规范
-│   │   └── ssml_builder.py         # SSML 标签构建引擎
-│   ├── utils/                      # 工具库
-│   │   └── retry.py                # 接口重试与容错机制
-│   ├── cache/                      # 角色音色配置与缓存
-│   │   └── characters.json         # 角色-音色映射表
-│   ├── config.py                   # 全局配置管理
-│   ├── main.py                     # 程序入口
-│   └── schemas.py                  # Pydantic 数据契约与类型定义
-├── sample_inputs/                  # 输入样例目录
-│   └── demo_chapter.txt            # 测试小说文本
-├── output/                         # 生成结果输出
-│   ├── chunks/                     # 分片音频临时目录
-│   ├── ssml/                       # 生成的 SSML 中间文件
-│   └── extraction_manifest.json    # 结构化抽取元数据
-├── tests/                          # 单元测试与流水线测试
-├── .env.example                    # 环境变量模版
-├── pyproject.toml                  # 项目依赖与配置
-└── requirements.txt                # 运行依赖项
 
 Visual interface
 <img width="1280" height="594" alt="image" src="https://github.com/user-attachments/assets/1a6ea666-b88c-48f4-81cb-03a242b9b818" />
