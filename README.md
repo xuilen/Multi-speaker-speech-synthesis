@@ -135,6 +135,8 @@ tts/progress.py                        记录分块生成进度清单，提供�
 
 audio/merger.py                        音频切片无缝合并、响度标准化（Loudness Normalization）与 BGM 混合。
 
+可视化界面：
+<img width="1280" height="594" alt="image" src="https://github.com/user-attachments/assets/1a6ea666-b88c-48f4-81cb-03a242b9b818" />
 
 
 
@@ -385,3 +387,6 @@ xiaoshuo/
 ├── .env.example                    # 环境变量模版
 ├── pyproject.toml                  # 项目依赖与配置
 └── requirements.txt                # 运行依赖项
+
+Visual interface
+<img width="1280" height="594" alt="image" src="https://github.com/user-attachments/assets/1a6ea666-b88c-48f4-81cb-03a242b9b818" />
