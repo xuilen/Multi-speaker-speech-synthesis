@@ -1,0 +1,8 @@
+azure-cognitiveservices-speech>=1.37.0
+edge-tts>=7.0.0
+openai>=1.40.0
+pydantic>=1.10,<3
+pydub>=0.25.1
+
+# System dependency required by pydub for MP3 import/export:
+# ffmpeg >= 5.0

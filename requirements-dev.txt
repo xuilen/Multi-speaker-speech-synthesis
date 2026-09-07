@@ -1,0 +1,2 @@
+-r novel_tts_system/requirements.txt
+pytest>=8.0.0

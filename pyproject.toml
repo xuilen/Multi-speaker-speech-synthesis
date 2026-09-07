@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novel-audiobook-tts"
+version = "0.1.0"
+description = "Convert long-form Chinese novels into multi-character Azure Speech audiobooks."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "azure-cognitiveservices-speech>=1.37.0",
+  "edge-tts>=7.0.0",
+  "openai>=1.40.0",
+  "pydantic>=1.10,<3",
+  "pydub>=0.25.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+azure = [
+  "azure-cognitiveservices-speech>=1.37.0",
+]
+
+edge = [
+  "edge-tts>=7.0.0",
+]
+
+[project.scripts]
+novel-tts = "novel_tts_system.main:main"
+
+[tool.setuptools.packages.find]
+include = ["novel_tts_system*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

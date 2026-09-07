@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>小说文本转有声书</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">声</div>
+          <div>
+            <h1>小说文本转有声书</h1>
+            <p>导入章节、匹配音色、生成可试听的有声书片段。</p>
+          </div>
+        </div>
+        <button id="themeToggle" class="icon-button" type="button" title="切换深浅色" aria-label="切换深浅色">◐</button>
+      </header>
+
+      <ol class="guide" aria-label="三步引导">
+        <li><span>①</span>导入文本</li>
+        <li><span>②</span>选音色生成</li>
+        <li><span>③</span>下载到本地</li>
+      </ol>
+
+      <main class="workspace">
+        <section class="panel import-panel" aria-labelledby="importTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">文本导入</p>
+              <h2 id="importTitle">小说原文</h2>
+            </div>
+            <span id="importStatus" class="soft-status">等待导入</span>
+          </div>
+
+          <label class="field-label" for="bookTitle">书名</label>
+          <input id="bookTitle" class="text-input" type="text" value="未命名小说" />
+
+          <label class="field-label" for="fileInput">本地文件</label>
+          <input id="fileInput" class="file-input" type="file" accept=".txt,.md,text/plain,text/markdown" />
+
+          <label class="field-label" for="rawText">粘贴文本</label>
+          <textarea id="rawText" class="raw-text" spellcheck="false" placeholder="在这里粘贴小说正文，或选择 .txt / .md 文件。"></textarea>
+
+          <div class="button-row">
+            <button id="parseButton" class="primary-button" type="button">识别章节</button>
+            <button id="sampleButton" class="secondary-button" type="button">载入示例</button>
+            <button id="clearButton" class="ghost-button" type="button">清空</button>
+          </div>
+        </section>
+
+        <section class="panel chapter-panel" aria-labelledby="chapterTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">章节预览</p>
+              <h2 id="chapterTitle">可编辑分章</h2>
+            </div>
+            <span id="chapterSummary" class="soft-status">0 章</span>
+          </div>
+
+          <div class="toolbar">
+            <button id="selectAllButton" class="secondary-button" type="button">全选章节</button>
+            <button id="invertSelectionButton" class="secondary-button" type="button">反选</button>
+            <button id="previewFirstButton" class="secondary-button" type="button">试听首章</button>
+          </div>
+
+          <div id="chapterList" class="chapter-list" aria-live="polite">
+            <div class="empty-state">导入文本后将在这里显示章节。</div>
+          </div>
+        </section>
+
+        <section class="panel control-panel" aria-labelledby="controlTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">生成控制</p>
+              <h2 id="controlTitle">音色与导出</h2>
+            </div>
+            <span id="supportStatus" class="soft-status">检测中</span>
+          </div>
+
+          <label class="field-label" for="ttsMode">生成模式</label>
+          <select id="ttsMode" class="text-input">
+            <option value="browser-preview">浏览器试听 Web Speech</option>
+            <option value="browser-record">浏览器录制导出 WAV</option>
+            <option value="online">在线接口导出 MP3/WAV</option>
+          </select>
+
+          <div id="modeNotice" class="notice"></div>
+
+          <div id="onlinePanel" class="online-panel" hidden>
+            <label class="field-label" for="endpointUrl">在线 TTS 接口地址</label>
+            <input id="endpointUrl" class="text-input" type="url" placeholder="https://example.com/tts" />
+
+            <label class="field-label" for="endpointToken">接口令牌</label>
+            <input id="endpointToken" class="text-input" type="password" placeholder="可留空" />
+
+            <div class="form-grid">
+              <label>
+                <span class="field-label">返回格式</span>
+                <select id="onlineFormat" class="text-input">
+                  <option value="mp3">MP3</option>
+                  <option value="wav">WAV</option>
+                </select>
+              </label>
+              <label>
+                <span class="field-label">单批字数</span>
+                <input id="maxBatchChars" class="text-input" type="number" min="300" max="5000" step="100" value="1400" />
+              </label>
+            </div>
+          </div>
+
+          <div class="slider-field">
+            <div class="slider-heading">
+              <label for="rateSlider">语速</label>
+              <output id="rateValue" for="rateSlider">1.0x</output>
+            </div>
+            <input id="rateSlider" type="range" min="0.5" max="2" step="0.1" value="1" />
+          </div>
+
+          <label class="switch-line">
+            <input id="speakerModeToggle" type="checkbox" checked />
+            <span>旁白 + 角色区分</span>
+          </label>
+
+          <div class="voice-header">
+            <h3>角色音色</h3>
+            <button id="refreshVoicesButton" class="ghost-button" type="button">刷新音色</button>
+          </div>
+          <div id="voiceTable" class="voice-table">
+            <div class="empty-state">导入文本后自动匹配角色。</div>
+          </div>
+
+          <div class="generation-box">
+            <div class="progress-row">
+              <span id="progressText">已完成 0 / 共 0 章</span>
+              <span id="activeStatus">空闲</span>
+            </div>
+            <div class="overall-progress" aria-hidden="true">
+              <span id="overallProgress"></span>
+            </div>
+          </div>
+
+          <div class="button-grid">
+            <button id="generateSelectedButton" class="primary-button" type="button">生成所选</button>
+            <button id="pauseButton" class="secondary-button" type="button">暂停</button>
+            <button id="resumeButton" class="secondary-button" type="button">继续</button>
+            <button id="stopButton" class="ghost-button" type="button">停止</button>
+            <button id="zipButton" class="primary-button full-span" type="button">打包已生成章节</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
