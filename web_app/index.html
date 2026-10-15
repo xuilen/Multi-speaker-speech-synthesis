@@ -3,157 +3,1163 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>小说文本转有声书</title>
+    <title>声影小说工坊 // PRTS-OS TACTICAL WORKSTATION</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">声</div>
-          <div>
-            <h1>小说文本转有声书</h1>
-            <p>导入章节、匹配音色、生成可试听的有声书片段。</p>
+  <body data-theme="cyan">
+    <!-- ================= 背景多层视觉系统 (Arknights Kinetic Layers) ================= -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="topo-overlay" aria-hidden="true"></div>
+    <div class="kinetic-bg-marquee top-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>PHONIC RESONANCE // MULTI-VOICE THEATER // ACOUSTIC SPECTRUM // RHODES SOUND LAB // NEURAL TTS ENGINE //&nbsp;</span>
+        <span>PHONIC RESONANCE // MULTI-VOICE THEATER // ACOUSTIC SPECTRUM // RHODES SOUND LAB // NEURAL TTS ENGINE //&nbsp;</span>
+      </div>
+    </div>
+    <div class="kinetic-bg-marquee bottom-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>CROSS-NOVEL CHARACTER TRANSPLANTATION // ARBORIST HIERARCHY // SPECTRUM HARMONICS // 01001000 //&nbsp;</span>
+        <span>CROSS-NOVEL CHARACTER TRANSPLANTATION // ARBORIST HIERARCHY // SPECTRUM HARMONICS // 01001000 //&nbsp;</span>
+      </div>
+    </div>
+    <div class="scanline-overlay" aria-hidden="true"></div>
+
+    <!-- ================= 侧边战术遥测导轨 (Side Telemetry Rails) ================= -->
+    <aside class="telemetry-rail left" aria-hidden="true">
+      <span class="vertical-code">WORKSTATION // PRTS-TTS-01</span>
+      <div class="rail-ticks"></div>
+      <span class="vertical-code">LAT 39.9042 N</span>
+    </aside>
+    <aside class="telemetry-rail right" aria-hidden="true">
+      <span class="vertical-code">60 FPS // SYNCED</span>
+      <div class="rail-ticks"></div>
+      <span class="vertical-code">PCM 44.1kHz / 16BIT</span>
+    </aside>
+
+    <!-- ================= 顶部 HUD 战术导航栏 (PRTS Topbar) ================= -->
+    <header class="hud-header">
+      <div class="brand-cluster">
+        <div class="rhodes-emblem" title="罗德岛源石声学终端">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <polygon points="12 2 22 12 12 22 2 12 12 2"></polygon>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <span class="sys-code">PRTS-OS // ACOUSTICS v4.95</span>
+          <span class="user-id" data-scramble="声影小说工坊">声影小说工坊</span>
+        </div>
+      </div>
+
+      <!-- 核心三栏分页切换导航 (Zero-Reload Modular Tabs) -->
+      <nav class="hud-nav" aria-label="核心工作台分页">
+        <button class="nav-btn active" data-target="sec-studio" type="button">
+          <span class="idx">01</span><span data-scramble="STUDIO // 小说制作">STUDIO // 小说制作</span>
+        </button>
+        <button class="nav-btn" data-target="sec-tree" type="button">
+          <span class="idx">02</span><span data-scramble="TREE // 角色音频树">TREE // 角色音频树</span>
+        </button>
+        <button class="nav-btn" data-target="sec-library" type="button">
+          <span class="idx">03</span><span data-scramble="LIBRARY // 语音素材库">LIBRARY // 语音素材库</span>
+        </button>
+      </nav>
+
+      <!-- 战术调色板与阵营配色切换 -->
+      <div class="hud-controls">
+        <div class="theme-dots" title="切换阵营色彩主题">
+          <div class="theme-dot active" data-theme-choice="cyan" style="background: #00e5ff;" title="罗德岛青蓝 (Rhodes Tactical Cyan)"></div>
+          <div class="theme-dot" data-theme-choice="amber" style="background: #f59e0b;" title="源石曜金 (Originium Amber)"></div>
+          <div class="theme-dot" data-theme-choice="crimson" style="background: #ff2a54;" title="猩红剧场 (Crimson Phantom)"></div>
+          <div class="theme-dot" data-theme-choice="monochrome" style="background: #ffffff;" title="极简工业 (Endfield Stencil)"></div>
+        </div>
+        <div class="topbar-telemetry">
+          <span class="telemetry-led"></span>
+          <span>NEURAL // READY</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= 主工作台容器 (Main Stage & Sections) ================= -->
+    <main class="hud-main">
+
+      <!-- ===================================================================
+           VIEW 01: 小说制作工坊 (Section Studio)
+           =================================================================== -->
+      <section class="mv-section active" id="sec-studio" aria-label="小说制作工坊">
+        <!-- 快速引导条 -->
+        <ol class="guide" aria-label="三步引导">
+          <li><span>①</span> 导入小说正文并智能拆分章节</li>
+          <li><span>②</span> 检视章节与 Alexandria 角色对白剧本</li>
+          <li><span>③</span> DAW 多角色演播试听与打包导出</li>
+        </ol>
+
+        <div class="workspace">
+          <!-- 面板 1：文本导入 -->
+          <section class="panel import-panel" aria-labelledby="importTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">文本导入</p>
+                <h2 id="importTitle">小说原文</h2>
+              </div>
+              <span id="importStatus" class="soft-status">等待导入</span>
+            </div>
+
+            <label class="field-label" for="bookTitle">书名</label>
+            <input id="bookTitle" class="text-input" type="text" value="三国演义" placeholder="请输入小说名称" />
+
+            <label class="field-label" for="fileInput">本地文件导入 <span class="badge-epub">EPUB</span> / .txt / .md</label>
+            <input id="fileInput" class="file-input" type="file" accept=".epub,.txt,.md,text/plain,text/markdown,application/epub+zip" />
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="field-label" for="rawText" style="margin-bottom: 0;">小说正文内容</label>
+              <div id="rawTextViewControls" class="raw-view-controls" style="display: none; font-size: 11.5px; align-items: center; gap: 8px;">
+                <span id="rawTextChapterIndicator" style="color: var(--accent); font-weight: 600;">当前展示：第 1 章</span>
+                <button id="toggleRawTextModeBtn" type="button" class="btn-link-action" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline;">📜 切换整书/单章</button>
+              </div>
+            </div>
+            <textarea id="rawText" class="raw-text" spellcheck="false" placeholder="在这里粘贴小说正文，或选择本地文件。"></textarea>
+
+            <div class="button-row">
+              <button id="parseButton" class="primary-button" type="button">智能识别分章</button>
+              <div style="display: flex; gap: 6px;">
+                <button id="sampleSanguoBtn" class="secondary-button" type="button" title="载入三国演义示例">三国演义</button>
+                <button id="sampleXianxiaBtn" class="secondary-button" type="button" title="载入凡人修仙传示例">凡人修仙</button>
+                <button id="sampleQingyuBtn" class="secondary-button" type="button" title="载入庆余年示例">庆余年</button>
+              </div>
+              <button id="clearButton" class="ghost-button" type="button">清空</button>
+            </div>
+          </section>
+
+          <!-- 面板 2：章节列表与剧本对白预览 -->
+          <section class="panel chapter-panel" aria-labelledby="chapterTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">剧本结构与逐章制作</p>
+                <h2 id="chapterTitle">章节与台词剧本</h2>
+              </div>
+              <span id="chapterSummary" class="soft-status">0 章</span>
+            </div>
+
+            <!-- 模式切换：📑 全书章节逐章卡片列表 vs 🧭 选定章节精配台 -->
+            <div class="chapter-workflow-tabs" role="tablist" aria-label="章节制作工作流模式">
+              <button id="chapterModeListBtn" class="chapter-workflow-tab is-active" type="button" role="tab" aria-selected="true" title="全书所有章节逐章卡片列表，一目了然逐章试听、精配与导出">
+                📑 逐章卡片列表 (一章一卡 · 全书总览)
+              </button>
+              <button id="chapterModeFocusBtn" class="chapter-workflow-tab" type="button" role="tab" aria-selected="false" title="针对当前选定章节的深度角色声线精调与逐句台词走带控制台">
+                🧭 选定章节精配台 (单章深度精修)
+              </button>
+            </div>
+
+            <!-- 工作流模式 1：逐章聚焦配音工作台 (Chapter Focus Deck) -->
+            <div id="chapterFocusDeck" class="chapter-focus-deck" style="display: none;">
+              <div class="empty-state">导入文本后将在此处呈现选定章节精配控制台。</div>
+            </div>
+
+            <!-- 工作流模式 2：全书章节批量列表 (Chapter List) -->
+            <div id="chapterListContainer" class="chapter-list-container">
+              <div class="toolbar">
+                <button id="selectAllButton" class="secondary-button" type="button">全选</button>
+                <button id="invertSelectionButton" class="secondary-button" type="button">反选</button>
+                <button id="previewFirstButton" class="secondary-button" type="button">试听首章</button>
+                <button id="openTreePageButton" class="secondary-button" type="button" style="margin-left: auto;">🌲 本书角色树</button>
+                <button id="openDeepTreePageButton" class="secondary-button" type="button" title="切换至 View 02 深度树检视与逐句台词微调">🔍 深度检视</button>
+              </div>
+
+              <div id="chapterList" class="chapter-list" aria-live="polite">
+                <div class="empty-state">导入文本后将在此处逐章呈现各章节卡片与对白剧本。</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 面板 3：生成控制、音频播放器与导出 -->
+          <section class="panel control-panel" aria-labelledby="controlTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">音频控制台</p>
+                <h2 id="controlTitle">合成播放与导出</h2>
+              </div>
+              <span id="supportStatus" class="soft-status">检测中</span>
+            </div>
+
+            <!-- 高级 DAW 风格母带音频播放控制台 -->
+            <div class="studio-master-deck tactical-frame" aria-label="音频主控台">
+              <div class="master-deck-header">
+                <div class="master-track-info">
+                  <span id="masterLedIndicator" class="master-led-indicator" title="演播状态指示灯"></span>
+                  <span id="playerStatusTitle" class="master-track-title">待播放：选择章节或点击播放</span>
+                </div>
+                <span id="playerTimeDisplay" class="master-timer-display">00:00 / 00:00</span>
+              </div>
+
+              <div class="master-speaker-row">
+                <span id="masterSpeakerBadge" class="master-speaker-badge">🎙️ 准备就绪</span>
+                <div class="deck-narrator-quick-switch" title="测试演播时快速切换旁白音色">
+                  <span class="deck-narrator-tag">演播旁白:</span>
+                  <select id="deckNarratorSelect" class="deck-narrator-select"></select>
+                  <button id="deckNarratorAuditionBtn" class="deck-audition-btn" type="button" title="试听当前选中的旁白声线">▶ 试听</button>
+                </div>
+                <span id="masterSegmentIndicator">句段 0 / 0</span>
+              </div>
+
+              <div class="wave-visualizer-box">
+                <canvas id="studioWaveCanvas" class="wave-canvas"></canvas>
+              </div>
+
+              <!-- 主控走带控制栏 (Transport) -->
+              <div class="master-transport-row">
+                <button id="playerPrevBtn" class="btn-transport-control" type="button" title="上一章">⏮</button>
+                <button id="playerPlayPauseBtn" class="btn-transport-play" type="button" title="播放 / 暂停">▶</button>
+                <button id="playerStopBtn" class="btn-transport-control" type="button" title="停止演播">⏹</button>
+                <button id="playerNextBtn" class="btn-transport-control" type="button" title="下一章">⏭</button>
+
+                <input id="playerProgress" class="master-scrubber" type="range" min="0" max="100" value="0" title="拖动进度跳转" />
+
+                <div class="speed-pills-row" title="演播倍速">
+                  <button type="button" class="speed-pill-btn" data-speed="0.8">0.8x</button>
+                  <button type="button" class="speed-pill-btn is-active" data-speed="1.0">1.0x</button>
+                  <button type="button" class="speed-pill-btn" data-speed="1.2">1.2x</button>
+                  <button type="button" class="speed-pill-btn" data-speed="1.5">1.5x</button>
+                </div>
+              </div>
+
+              <!-- 主控副走带控制：音量推子、静音开关与连播模式 -->
+              <div class="master-aux-row">
+                <div class="deck-volume-box" title="演播输出音量控制">
+                  <button id="playerMuteBtn" class="deck-mute-btn" type="button" title="点击静音 / 恢复音量">🔊</button>
+                  <input id="playerVolumeSlider" class="deck-volume-slider" type="range" min="0" max="1" step="0.05" value="1" title="滑动调节音量" />
+                  <span id="playerVolumeLabel" class="deck-volume-label">100%</span>
+                </div>
+                <div class="deck-mode-box">
+                  <button id="playerLoopModeBtn" class="deck-mode-btn" type="button" title="点击切换演播模式 (全部连播 / 单章循环 / 播完停止)">🔁 顺序连播</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="field-label" for="ttsMode">生成模式</label>
+            <select id="ttsMode" class="text-input">
+              <option value="browser-preview">浏览器试听 Web Speech (即时演播)</option>
+              <option value="browser-record">浏览器内录导出 WAV (无需外部服务)</option>
+              <option value="online">在线接口导出 MP3/WAV (自定义接口)</option>
+            </select>
+
+            <div id="modeNotice" class="notice"></div>
+
+            <div id="onlinePanel" class="online-panel" hidden>
+              <label class="field-label" for="endpointUrl">在线 TTS 接口地址</label>
+              <input id="endpointUrl" class="text-input" type="url" placeholder="https://example.com/tts" />
+
+              <label class="field-label" for="endpointToken">接口令牌 (Token)</label>
+              <input id="endpointToken" class="text-input" type="password" placeholder="可留空" />
+
+              <div class="form-grid">
+                <label>
+                  <span class="field-label">返回格式</span>
+                  <select id="onlineFormat" class="text-input">
+                    <option value="mp3">MP3</option>
+                    <option value="wav">WAV</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="field-label">单批字数</span>
+                  <input id="maxBatchChars" class="text-input" type="number" min="300" max="5000" step="100" value="1400" />
+                </label>
+              </div>
+            </div>
+
+            <div class="slider-field">
+              <div class="slider-header">
+                <label for="speedSlider">演播语速</label>
+                <output id="speedValue">1.00x</output>
+              </div>
+              <input id="speedSlider" type="range" min="0.5" max="2" step="0.05" value="1" />
+            </div>
+
+            <div class="switch-row">
+              <label class="switch-label" for="speakerModeToggle">
+                <input id="speakerModeToggle" type="checkbox" checked />
+                <span>启用多角色分人演播（关闭则由旁白单人演播全书）</span>
+              </label>
+            </div>
+
+            <!-- 本书已登场角色音色快速分配条 -->
+            <div class="studio-quick-casting-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span class="field-label" style="margin: 0; font-weight: 700;">⚡ 角色声线快速分配 (<span id="quickCastingCount">0</span>)</span>
+                <button id="jumpToTreeSectionBtn" type="button" class="btn-link-action" style="font-size: 11.5px; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline;">🌲 展开下方角色树</button>
+              </div>
+              <div id="characterChips" class="character-chips-wrap"></div>
+            </div>
+
+            <div class="button-column">
+              <button id="generateSelectedButton" class="primary-button" type="button">批量生成所选章节</button>
+              <button id="generateAllButton" class="secondary-button" type="button">生成全部章节</button>
+              <button id="downloadZipButton" class="secondary-button" type="button">打包已生成章节 (ZIP)</button>
+            </div>
+
+            <div class="progress-wrap">
+              <div class="progress-meta">
+                <span>导出进度</span>
+                <span id="overallProgressLabel">0%</span>
+              </div>
+              <progress id="overallProgress" max="100" value="0"></progress>
+              <p id="audioStatusText" class="status-text">就绪</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- ===================================================================
+             SECTION STUDIO: 本书角色音频树与自由音色配置工作台
+             (Novel Character Voice Tree & Freestyle Casting Console)
+             =================================================================== -->
+        <section class="studio-char-tree-section tactical-frame" id="studioCharTreeSection" aria-label="本书角色音频树与自由选音工作台">
+          <div class="studio-tree-header">
+            <div class="studio-tree-title-group">
+              <div class="studio-tree-tag">CHARACTER VOICE TREE & FREESTYLE CASTING CONSOLE</div>
+              <h3 class="studio-tree-title">🌲 本书角色音频树与自由声线配置</h3>
+              <span id="studioTreeStatsBadge" class="badge-role">共 0 位角色 · 已绑定语音树</span>
+            </div>
+            
+            <div class="studio-tree-controls">
+              <!-- 整套方案一键应用 -->
+              <div class="studio-scheme-box" title="一键切换全书预设或自建角色音色方案">
+                <span class="field-label-inline">方案：</span>
+                <select id="studioSchemeSelect" class="text-input text-input-sm"></select>
+                <button id="studioApplySchemeBtn" class="primary-button btn-sm" type="button">一键替换全书音色</button>
+              </div>
+
+              <!-- 视图模式切换 -->
+              <div class="studio-view-toggle-box">
+                <button id="studioViewGridBtn" class="speed-pill-btn is-active" type="button" title="切换为卡片矩阵视图 (多列紧凑排版)">🗂️ 角色矩阵 (默认)</button>
+                <button id="studioViewTreeBtn" class="speed-pill-btn" type="button" title="切换为单行树状分层结构视图">🌳 单行树状</button>
+              </div>
+
+              <!-- 快捷操作按钮 -->
+              <button id="studioDiagnoseBtn" class="secondary-button btn-sm" type="button" title="智能体检：检测全书角色声线冲突与重复度">🩺 声线体检</button>
+              <button id="studioAddCharBtn" class="secondary-button btn-sm" type="button" title="添加新角色到本书语音树">➕ 加角色</button>
+              <button id="studioOpenDeepTreeBtn" class="secondary-button btn-sm" type="button" title="进入 View 02 全屏深度树检视与逐句台词微调">🔍 全屏深度检视</button>
+            </div>
+          </div>
+
+          <!-- 智能题材声学雷达与推荐方案卡片 -->
+          <div class="smart-scheme-recommend-card" id="studioSmartSchemeCard">
+            <div class="smart-scheme-radar-header">
+              <div class="smart-scheme-title-col">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="smart-scheme-badge">🎯 题材声学雷达</span>
+                  <span id="smartMatchBadge" class="badge-role" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">自适应匹配算法已就绪</span>
+                </div>
+                <h4 class="smart-scheme-headline" id="smartSchemeHeadline">题材识别中：导入小说或载入示例即刻分析</h4>
+                <p class="smart-scheme-subtext" id="smartSchemeSubtext">基于全书叙事风格、关键词与角色关系，智能推断最契合的配音方案与演播旁白。</p>
+              </div>
+              <div class="smart-scheme-action-col">
+                <button id="smartSchemeAutoApplyBtn" class="primary-button btn-pulse" type="button">✨ 智能装配推荐方案</button>
+              </div>
+            </div>
+            <div class="smart-scheme-pills-row" id="smartSchemePillsRow"></div>
+          </div>
+
+          <!-- 快速搜索与多维矩阵筛选栏 -->
+          <div class="studio-tree-filter-bar">
+            <div class="tree-search-wrap" style="position: relative; max-width: 320px;">
+              <span class="tree-search-icon">🔍</span>
+              <input id="studioCharSearchInput" class="tree-search-input" type="text" placeholder="实时搜索角色名、声线、人设或别名..." style="padding-right: 28px;" />
+              <button id="studioCharSearchClearBtn" class="search-clear-btn" type="button" title="清空搜索" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; display: none; font-size: 13px;">✕</button>
+            </div>
+            <div class="studio-category-filters" id="studioCategoryFilters">
+              <button type="button" class="studio-filter-pill is-active" data-filter="all">全部 (<span id="filterCountAll">0</span>)</button>
+              <button type="button" class="studio-filter-pill" data-filter="male">♂️ 男声 (<span id="filterCountMale">0</span>)</button>
+              <button type="button" class="studio-filter-pill" data-filter="female">♀️ 女声 (<span id="filterCountFemale">0</span>)</button>
+              <button type="button" class="studio-filter-pill" data-filter="narrator">🎙️ 旁白 (<span id="filterCountNarrator">0</span>)</button>
+              <button type="button" class="studio-filter-pill" data-filter="main">⚔️ 核心演播 (<span id="filterCountMain">0</span>)</button>
+              <button type="button" class="studio-filter-pill" data-filter="supporting">👥 客串 (<span id="filterCountSupporting">0</span>)</button>
+            </div>
+            <div class="matrix-density-box" style="margin-left: auto; display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 11px; color: var(--muted);">密度:</span>
+              <button id="studioMatrixCompactBtn" class="node-mini-btn is-active" type="button" title="高密度矩阵排版，最小垂直高度">🗜️ 紧凑</button>
+              <button id="studioMatrixComfortBtn" class="node-mini-btn" type="button" title="舒适矩阵排版">📐 舒适</button>
+            </div>
+          </div>
+
+          <!-- 卡片矩阵视图 (Card Grid View) - 默认高密度矩阵排版 -->
+          <div id="studioTreeGridView" class="studio-char-grid-view is-compact">
+            <!-- 动态渲染卡片矩阵 -->
+          </div>
+
+          <!-- 树状分层视图 (Hierarchical Tree View) - 备选视图 -->
+          <div id="studioTreeHierarchicalView" class="studio-tree-hierarchical-view" style="display: none;">
+            <!-- 动态渲染树结构 -->
+          </div>
+        </section>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 02: 角色音频树可视化 (Section Character Tree)
+           =================================================================== -->
+      <section class="mv-section" id="sec-tree" aria-label="当前小说角色音频树">
+        <!-- 方案切换与诊断总览条 -->
+        <div class="tree-scheme-bar">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span>🎨 <strong>整套角色配音树方案一键切换：</strong></span>
+            <select id="treeSchemeSelect" class="text-input text-input-sm" style="font-weight: 600; min-width: 240px;"></select>
+            <button id="applyTreeSchemeBtn" class="primary-button btn-sm" type="button">一键替换全书音色</button>
+          </div>
+          <div style="font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px;">
+            <span>当前方案：</span>
+            <span id="activeTreeSchemeBadge" class="badge-role" style="color: var(--accent-strong); font-weight: 600;">自定义当前树</span>
+            <span id="treeBannerInfo" style="margin-left: 10px; font-size: 11.5px; color: var(--subtle);"></span>
           </div>
         </div>
-        <button id="themeToggle" class="icon-button" type="button" title="切换深浅色" aria-label="切换深浅色">◐</button>
-      </header>
 
-      <ol class="guide" aria-label="三步引导">
-        <li><span>①</span>导入文本</li>
-        <li><span>②</span>选音色生成</li>
-        <li><span>③</span>下载到本地</li>
-      </ol>
-
-      <main class="workspace">
-        <section class="panel import-panel" aria-labelledby="importTitle">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">文本导入</p>
-              <h2 id="importTitle">小说原文</h2>
+        <!-- 双栏布局：左侧 Arborist 树形组件，右侧 Alexandria 角色检视器 -->
+        <div class="character-inspector-grid">
+          <!-- 左栏：React-Arborist 风格树视图 -->
+          <section class="arborist-wrapper" aria-label="小说角色音频树">
+            <div class="tree-toolbar">
+              <div class="tree-search-wrap">
+                <span class="tree-search-icon">🔍</span>
+                <input id="treeSearchInput" class="tree-search-input" type="text" placeholder="搜索角色名、音色或人设分类..." />
+              </div>
+              <div class="tree-actions-wrap">
+                <button id="expandAllBtn" class="tree-mini-btn" type="button" title="展开所有节点">展开全部</button>
+                <button id="collapseAllBtn" class="tree-mini-btn" type="button" title="折叠所有分类">折叠</button>
+                <button id="diagnoseTreeBtn" class="tree-mini-btn" type="button" title="智能检测全书角色声线冲突、重叠度与健康评分">🩺 声线体检</button>
+                <button id="exportCastingCardBtn" class="tree-mini-btn" type="button" title="导出全书配音卡片">📤 导出档案</button>
+                <button id="batchCleanCharsBtn" class="tree-mini-btn btn-danger-soft" type="button" title="一键清理零台词冗余角色">🧹 瘦身清理</button>
+                <button id="addCharacterBtn" class="tree-mini-btn" type="button" title="向当前小说添加自定义角色">➕ 加角色</button>
+              </div>
             </div>
-            <span id="importStatus" class="soft-status">等待导入</span>
-          </div>
 
-          <label class="field-label" for="bookTitle">书名</label>
-          <input id="bookTitle" class="text-input" type="text" value="未命名小说" />
-
-          <label class="field-label" for="fileInput">本地文件</label>
-          <input id="fileInput" class="file-input" type="file" accept=".txt,.md,text/plain,text/markdown" />
-
-          <label class="field-label" for="rawText">粘贴文本</label>
-          <textarea id="rawText" class="raw-text" spellcheck="false" placeholder="在这里粘贴小说正文，或选择 .txt / .md 文件。"></textarea>
-
-          <div class="button-row">
-            <button id="parseButton" class="primary-button" type="button">识别章节</button>
-            <button id="sampleButton" class="secondary-button" type="button">载入示例</button>
-            <button id="clearButton" class="ghost-button" type="button">清空</button>
-          </div>
-        </section>
-
-        <section class="panel chapter-panel" aria-labelledby="chapterTitle">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">章节预览</p>
-              <h2 id="chapterTitle">可编辑分章</h2>
+            <div style="padding: 10px 14px; background: var(--panel-strong); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted);">
+              <span id="treeStatsText">共 0 位角色 · 已绑定音色</span>
+              <span>💡 点击节点检视，点击 ▶ 试听</span>
             </div>
-            <span id="chapterSummary" class="soft-status">0 章</span>
-          </div>
 
-          <div class="toolbar">
-            <button id="selectAllButton" class="secondary-button" type="button">全选章节</button>
-            <button id="invertSelectionButton" class="secondary-button" type="button">反选</button>
-            <button id="previewFirstButton" class="secondary-button" type="button">试听首章</button>
-          </div>
+            <!-- 树形节点容器 -->
+            <ul id="arboristTreeRoot" class="arborist-tree">
+              <!-- 动态渲染树结构 -->
+            </ul>
+          </section>
 
-          <div id="chapterList" class="chapter-list" aria-live="polite">
-            <div class="empty-state">导入文本后将在这里显示章节。</div>
-          </div>
-        </section>
-
-        <section class="panel control-panel" aria-labelledby="controlTitle">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">生成控制</p>
-              <h2 id="controlTitle">音色与导出</h2>
+          <!-- 右栏：Alexandria 风格角色音色与台词检视器 -->
+          <section class="inspector-card tactical-frame" aria-label="角色音色检视与微调">
+            <div class="char-hero-header">
+              <div class="avatar-astrolabe-wrap">
+                <svg class="astrolabe-ring-svg" viewBox="0 0 100 100" fill="none">
+                  <circle cx="50" cy="50" r="47" stroke="rgba(0, 229, 255, 0.4)" stroke-width="1.2" stroke-dasharray="14 6 3 6" class="spin-cw" />
+                  <circle cx="50" cy="50" r="42" stroke="rgba(245, 158, 11, 0.45)" stroke-width="1" stroke-dasharray="4 8" class="spin-ccw" />
+                  <circle cx="50" cy="50" r="36" stroke="rgba(255, 255, 255, 0.15)" stroke-width="0.8" />
+                </svg>
+                <div id="inspectorAvatar" class="char-avatar-large">👤</div>
+              </div>
+              <div class="char-hero-info" style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h2 id="inspectorCharName">选择角色</h2>
+                  <span id="inspectorRoleBadge" class="badge-role">旁白演播</span>
+                  <span id="inspectorVoiceBadge" class="badge-voice">云希</span>
+                </div>
+                <p id="inspectorArchetypeDesc">在左侧角色音频树中选择任意人物，即可微调其音色、音高、语速与原著对白。</p>
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                <button id="pickVoiceBtn" class="secondary-button btn-sm" type="button" title="从微软音色库挑选">🗂️ 更换音色</button>
+                <button id="swapVoiceBtn" class="secondary-button btn-sm" type="button" title="与本小说其他角色对调音色">🔄 对调音色</button>
+                <button id="renameCharBtn" class="secondary-button btn-sm" type="button" title="重命名此角色">✏️ 重命名</button>
+                <button id="copyVoiceBtn" class="ghost-button btn-sm" type="button" title="复制当前声线配置">📋 复制声线</button>
+                <button id="pasteVoiceBtn" class="ghost-button btn-sm" type="button" title="粘贴声线配置">📥 粘贴</button>
+                <button id="mergeCharBtn" class="ghost-button btn-sm" type="button" title="将此角色合并到其他角色">🔀 合并</button>
+                <button id="deleteCharBtn" class="ghost-button btn-sm" type="button" style="color: #ef4444;" title="从角色树中删除此角色">🗑️ 删除</button>
+              </div>
             </div>
-            <span id="supportStatus" class="soft-status">检测中</span>
-          </div>
 
-          <label class="field-label" for="ttsMode">生成模式</label>
-          <select id="ttsMode" class="text-input">
-            <option value="browser-preview">浏览器试听 Web Speech</option>
-            <option value="browser-record">浏览器录制导出 WAV</option>
-            <option value="online">在线接口导出 MP3/WAV</option>
-          </select>
+            <!-- 旁白专属声线快速切换胶囊盒（检视旁白时激活） -->
+            <div id="narratorQuickPillsBox" style="display: none; padding: 10px 14px; background: rgba(245, 158, 11, 0.08); border-radius: var(--radius-sm); border: 1px dashed var(--accent); margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong style="font-size: 12px; color: var(--accent-strong);">🎙️ 演播旁白专属声线一键自由切换：</strong>
+                <span style="font-size: 11px; color: var(--muted);">点击立即试听并覆盖当前旁白声线</span>
+              </div>
+              <div id="narratorQuickPillsContainer" class="narrator-preset-pills"></div>
+            </div>
 
-          <div id="modeNotice" class="notice"></div>
+            <!-- 实时音频波形与单句试听 -->
+            <div class="wave-visualizer-box">
+              <div class="wave-controls">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text);">角色专属声线预览</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button id="playAllCharLinesBtn" class="secondary-button btn-sm" type="button" title="连续试听该角色的全部原著台词">▶ 连放全部台词</button>
+                  <button id="auditionCharVoiceBtn" class="primary-button" type="button" style="min-height: 28px; height: 28px; padding: 0 12px; font-size: 12px;">▶ 试听专属声线</button>
+                </div>
+              </div>
+              <canvas id="inspectorWaveCanvas" class="wave-canvas"></canvas>
+              <div style="font-size: 12px; color: var(--muted); font-style: italic;" id="inspectorSampleLine">
+                “天地不仁，以万物为刍狗；日月经天，江河行地。”
+              </div>
+            </div>
 
-          <div id="onlinePanel" class="online-panel" hidden>
-            <label class="field-label" for="endpointUrl">在线 TTS 接口地址</label>
-            <input id="endpointUrl" class="text-input" type="url" placeholder="https://example.com/tts" />
+            <!-- 音色微调控制项 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: var(--panel-strong); padding: 14px; border-radius: 8px; border: 1px solid var(--line);">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px;">
+                  <label for="charPitchSlider">音高语调 (Pitch)</label>
+                  <output id="charPitchValue">1.00</output>
+                </div>
+                <input id="charPitchSlider" type="range" min="0.6" max="1.4" step="0.02" value="1.0" style="width: 100%; accent-color: var(--accent);" />
+              </div>
 
-            <label class="field-label" for="endpointToken">接口令牌</label>
-            <input id="endpointToken" class="text-input" type="password" placeholder="可留空" />
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px;">
+                  <label for="charRateSlider">语速微调 (Rate)</label>
+                  <output id="charRateValue">0%</output>
+                </div>
+                <input id="charRateSlider" type="range" min="-30" max="30" step="2" value="0" style="width: 100%; accent-color: var(--accent);" />
+              </div>
 
-            <div class="form-grid">
-              <label>
-                <span class="field-label">返回格式</span>
-                <select id="onlineFormat" class="text-input">
-                  <option value="mp3">MP3</option>
-                  <option value="wav">WAV</option>
+              <div style="grid-column: 1 / -1; display: flex; align-items: center; gap: 12px;">
+                <label for="charEmotionSelect" style="font-size: 12.5px; white-space: nowrap;">情感基调风格：</label>
+                <select id="charEmotionSelect" class="text-input text-input-sm" style="flex: 1;">
+                  <option value="chat">自然对话 (chat)</option>
+                  <option value="narration-relaxed">轻松叙事 (narration-relaxed)</option>
+                  <option value="cheerful">欢快喜悦 (cheerful)</option>
+                  <option value="serious">严肃庄重 (serious)</option>
+                  <option value="angry">怒气冲冲 (angry)</option>
+                  <option value="sad">悲伤哀戚 (sad)</option>
+                  <option value="fearful">恐惧颤抖 (fearful)</option>
+                  <option value="gentle">温柔亲切 (gentle)</option>
+                  <option value="whispering">低语耳语 (whispering)</option>
                 </select>
-              </label>
-              <label>
-                <span class="field-label">单批字数</span>
-                <input id="maxBatchChars" class="text-input" type="number" min="300" max="5000" step="100" value="1400" />
-              </label>
+                <button id="saveCharConfigBtn" class="primary-button btn-sm" type="button" style="white-space: nowrap;">💾 保存微调</button>
+              </div>
+            </div>
+
+            <!-- 原著台词对白检视展示 (Alexandria Style) -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 style="font-size: 14px; margin: 0;">原著角色台词对白录（点击 ▶ 即可听该角色演播台词）</h3>
+                <span id="charLinesSummary" style="font-size: 12px; color: var(--muted);">共 0 句</span>
+              </div>
+              <div id="charDialogueDeck" class="script-deck-container" style="max-height: 280px;">
+                <!-- 动态原著对白卡片 -->
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           VIEW 03: 全局角色语音素材库 (Section Voice Library)
+           =================================================================== -->
+      <section class="mv-section" id="sec-library" aria-label="全局角色语音素材库">
+        <!-- 全息声学监听视听舱 (Acoustic Phonic Monitor Deck) -->
+        <section class="voice-library-monitor-deck tactical-frame" aria-label="全息声学监听视听舱">
+          <div class="monitor-deck-header">
+            <div class="monitor-deck-info">
+              <span class="telemetry-led"></span>
+              <span id="libraryMonitorTitle" class="monitor-title">声线声学监听：点击左侧素材树或右侧目标角色的【▶ 试听】按钮实时监测波形</span>
+            </div>
+            <div class="monitor-meta-tags">
+              <span id="libraryVoiceBadge" class="badge-voice">待监听声线</span>
+              <span id="libraryArchetypeBadge" class="badge-role">特征分析中</span>
+              <button id="libraryStopAuditionBtn" class="tree-mini-btn" type="button" title="停止试听声线">⏹ 停止试听</button>
             </div>
           </div>
-
-          <div class="slider-field">
-            <div class="slider-heading">
-              <label for="rateSlider">语速</label>
-              <output id="rateValue" for="rateSlider">1.0x</output>
-            </div>
-            <input id="rateSlider" type="range" min="0.5" max="2" step="0.1" value="1" />
-          </div>
-
-          <label class="switch-line">
-            <input id="speakerModeToggle" type="checkbox" checked />
-            <span>旁白 + 角色区分</span>
-          </label>
-
-          <div class="voice-header">
-            <h3>角色音色</h3>
-            <button id="refreshVoicesButton" class="ghost-button" type="button">刷新音色</button>
-          </div>
-          <div id="voiceTable" class="voice-table">
-            <div class="empty-state">导入文本后自动匹配角色。</div>
-          </div>
-
-          <div class="generation-box">
-            <div class="progress-row">
-              <span id="progressText">已完成 0 / 共 0 章</span>
-              <span id="activeStatus">空闲</span>
-            </div>
-            <div class="overall-progress" aria-hidden="true">
-              <span id="overallProgress"></span>
-            </div>
-          </div>
-
-          <div class="button-grid">
-            <button id="generateSelectedButton" class="primary-button" type="button">生成所选</button>
-            <button id="pauseButton" class="secondary-button" type="button">暂停</button>
-            <button id="resumeButton" class="secondary-button" type="button">继续</button>
-            <button id="stopButton" class="ghost-button" type="button">停止</button>
-            <button id="zipButton" class="primary-button full-span" type="button">打包已生成章节</button>
+          <div class="wave-visualizer-box">
+            <canvas id="libraryWaveCanvas" class="wave-canvas"></canvas>
           </div>
         </section>
-      </main>
+
+        <!-- 双栏混搭工作台 -->
+        <div class="library-workbench">
+          <!-- 左栏：三种素材来源 -->
+          <section class="workbench-card" aria-label="全局角色语音素材来源">
+            <div class="workbench-card-header">
+              <div>
+                <h2><span>🗂️ 全局角色语音素材库</span></h2>
+                <p style="margin: 2px 0 0; font-size: 12px; color: var(--muted);">从三大来源中浏览音色，点击 ▶ 试听，按住节点向右拖拽混搭</p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="openAbCompareModalBtn" class="secondary-button btn-sm" type="button" title="双声线 A/B 对比试听">
+                  ⚖️ A/B 对比试听
+                </button>
+                <button id="quickTransplantModalBtn" class="secondary-button btn-sm" type="button" title="通过下拉选择快速移植">
+                  ⚡ 快速移植向导
+                </button>
+              </div>
+            </div>
+
+            <!-- 五大素材来源选项卡 -->
+            <div class="source-tabs-bar" role="tablist">
+              <button id="tabPastNovelsBtn" class="source-tab-btn is-active" type="button" role="tab" aria-selected="true">
+                <span>📚 过往小说音频树</span>
+              </button>
+              <button id="tabCustomTreesBtn" class="source-tab-btn" type="button" role="tab" aria-selected="false">
+                <span>🛠️ 自建自创角色树</span>
+              </button>
+              <button id="tabMsCatalogBtn" class="source-tab-btn" type="button" role="tab" aria-selected="false">
+                <span>🌐 微软内置分类树</span>
+              </button>
+              <button id="tabGithubAiBtn" class="source-tab-btn" type="button" role="tab" aria-selected="false">
+                <span>🔮 GitHub 开源 AI 语音库</span>
+              </button>
+              <button id="tabAiMangaBtn" class="source-tab-btn" type="button" role="tab" aria-selected="false" style="color: #ec4899;">
+                <span>🎬 AI 漫剧全年龄语音库</span>
+              </button>
+              <button id="tabVoiceLearnerBtn" class="source-tab-btn" type="button" role="tab" aria-selected="false" style="color: #10b981; font-weight: 700;">
+                <span>🎧 声音学习与自创专属树</span>
+              </button>
+            </div>
+
+            <!-- 题材风格快捷筛选胶囊 -->
+            <div class="genre-filter-pills" id="genreFilterPills">
+              <button type="button" class="genre-pill-btn is-active" data-genre="all">全部</button>
+              <button type="button" class="genre-pill-btn" data-genre="learner" style="color: #10b981; font-weight: 600;">🎧 声音学习</button>
+              <button type="button" class="genre-pill-btn" data-genre="manga" style="color: #ec4899; font-weight: 600;">🎬 AI漫剧</button>
+              <button type="button" class="genre-pill-btn" data-genre="narrator">旁白经典</button>
+              <button type="button" class="genre-pill-btn" data-genre="youngMale">少侠男主</button>
+              <button type="button" class="genre-pill-btn" data-genre="youngFemale">柔美女主</button>
+              <button type="button" class="genre-pill-btn" data-genre="mature">沉稳大叔</button>
+              <button type="button" class="genre-pill-btn" data-genre="elderVillain">老辣谋士</button>
+              <button type="button" class="genre-pill-btn" data-genre="child">童声萌宠</button>
+              <button type="button" class="genre-pill-btn" data-genre="dialect">地方方言</button>
+              <button type="button" class="genre-pill-btn" data-genre="opensource" style="color: var(--cyan);">🔮 开源模型</button>
+            </div>
+
+            <!-- 搜索与操作条 -->
+            <div class="tree-toolbar">
+              <div class="tree-search-wrap">
+                <span class="tree-search-icon">🔍</span>
+                <input id="sourceSearchInput" class="tree-search-input" type="text" placeholder="搜索素材角色、音色、AI漫剧、开源模型、书名..." />
+              </div>
+              <div class="tree-actions-wrap">
+                <button id="importAiMangaTreeBtn" class="tree-mini-btn" type="button" title="一键导入 24 位跨越幼年萌宝、热血少年、冷面霸总、清冷神女、仙门掌教到阴鸷魔尊的全年龄段 AI 漫剧爆款配音树" style="color: #ec4899; border-color: rgba(236, 72, 153, 0.55); font-weight: 600;">🎬 一键导入 AI 漫剧树</button>
+                <button id="downloadAiMangaBtn" class="tree-mini-btn" type="button" title="下载 AI 漫剧全年龄配音树配置 (支持 JSON 与 Markdown 档案下载)" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.55);">💾 下载漫剧配置</button>
+                <button id="importFullAzureTreeBtn" class="tree-mini-btn" type="button" title="直接一键全量复制微软 Azure 官方全景角色树（22位全角色，无需试听）到自建库" style="color: var(--accent); border-color: rgba(245, 158, 11, 0.45); font-weight: 600;">📥 一键复制 Azure 角色树</button>
+                <button id="importGitHubAiTreeBtn" class="tree-mini-btn" type="button" title="一键导入预置的 GitHub 开源 AI 语音模型（Qwen3、CosyVoice、ChatTTS、F5-TTS）到自建库" style="color: var(--cyan); border-color: rgba(0, 229, 255, 0.45); font-weight: 600;">🔮 一键导入 GitHub 树</button>
+                <button id="addCustomGitHubTreeBtn" class="tree-mini-btn" type="button" title="自助录入外部/GitHub开源语音树，配置模型仓库、声线映射与音强调优" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.6); font-weight: 700;">➕ 自助录入开源树</button>
+                <button id="sourceExpandAllBtn" class="tree-mini-btn" type="button">全部展开</button>
+                <button id="sourceCollapseAllBtn" class="tree-mini-btn" type="button">全部折叠</button>
+                <button id="createCustomTreeBtn" class="tree-mini-btn" type="button" style="display: none;">➕ 新建模版</button>
+              </div>
+            </div>
+
+            <!-- 素材树容器 -->
+            <div class="workbench-body">
+              <ul id="sourceTreeRoot" class="arborist-tree" style="min-height: 480px;">
+                <!-- 动态素材树 -->
+              </ul>
+            </div>
+          </section>
+
+          <!-- 右栏：目标小说混搭移植工作台 -->
+          <section class="workbench-card" aria-label="目标小说角色音频树混搭工作台">
+            <div class="workbench-card-header">
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <h2><span>🎯 混搭工作台</span></h2>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+                  <label for="targetNovelSelect" style="color: var(--muted); font-size: 12px; white-space: nowrap;">目标小说：</label>
+                  <select id="targetNovelSelect" class="text-input text-input-sm" style="font-weight: 600;"></select>
+                </div>
+              </div>
+              <span id="targetCharCountBadge" class="badge-role">4 位角色</span>
+            </div>
+
+            <!-- 拖拽操作与整套方案快速导入卡 -->
+            <div style="padding: 10px 14px; background: rgba(216, 168, 79, 0.08); border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--text); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>🌲 <strong>整套方案一键覆盖：</strong></span>
+                <select id="quickSchemeApplySelect" class="text-input text-input-sm" style="font-weight: 600; min-width: 210px;"></select>
+                <button id="quickSchemeApplyBtn" class="secondary-button btn-sm" type="button" title="将所选整套配音树方案应用至目标小说">一键应用</button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="targetCleanEmptyCharsBtn" class="ghost-button btn-sm" type="button" title="一键清理目标小说中0台词的冗余角色" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">🧹 瘦身清理</button>
+                <button id="resetTargetTreeBtn" class="ghost-button btn-sm" type="button" title="恢复为默认音色搭配">🔄 重置为默认</button>
+              </div>
+            </div>
+
+            <!-- 目标小说角色音频树 (可放置区) -->
+            <div class="workbench-body">
+              <ul id="targetTreeRoot" class="arborist-tree">
+                <!-- 动态目标角色列表 (含 dragover / drop 响应) -->
+              </ul>
+
+              <!-- 底部新增角色放置框 -->
+              <div id="addNewCharDropZone" class="drop-zone-card" data-drop-mode="add-new">
+                <span style="font-size: 18px;">➕</span>
+                <p style="margin: 4px 0 0; font-size: 12.5px;">将左侧任意角色节点拖拽至此处，直接作为新角色加入当前小说</p>
+              </div>
+
+              <!-- 混搭移植历史日志 -->
+              <div style="margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-size: 12px; font-weight: 600; color: var(--muted);">本次混搭移植操作动态记录</span>
+                  <span id="remixLogCount" style="font-size: 11px; color: var(--subtle);">0 条操作</span>
+                </div>
+                <div id="remixLogBox" class="remix-log-box">
+                  <div class="remix-log-item" style="color: var(--subtle); font-style: italic;">
+                    暂无混搭移植操作，尝试从左侧拖拽音色节点放置到右侧角色上吧！
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 工作台底部持久化与导出操作栏 -->
+            <div class="workbench-actions-footer">
+              <div style="display: flex; gap: 8px;">
+                <button id="saveRemixToStudioBtn" class="primary-button" type="button" title="将当前混搭好的角色配音同步到制作工坊">💾 保存混搭至当前小说</button>
+                <button id="saveAsCustomSchemeBtn" class="secondary-button" type="button" title="另存为自定义角色树模版">🌟 另存为自建方案</button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="exportSchemeJsonBtn" class="ghost-button btn-sm" type="button" title="导出当前角色树配置为 JSON">📤 导出 JSON</button>
+                <button id="importSchemeJsonBtn" class="ghost-button btn-sm" type="button" title="从外部导入角色树 JSON 配置文件">📥 导入 JSON</button>
+                <input id="schemeFileInput" type="file" accept=".json,application/json" style="display: none;" />
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ================= 底部固定全功能 DAW 播放与提词器栏 (Master Footer Bar) ================= -->
+    <footer class="studio-master-footer" aria-label="全域母带音频监控栏">
+      <canvas id="bottom-eq-canvas"></canvas>
+
+      <!-- 走带曲目信息 -->
+      <div class="footer-track-info">
+        <button id="footerPlayPauseBtn" class="footer-disc-btn" type="button" title="演播播放 / 暂停">▶</button>
+        <div class="footer-track-meta">
+          <span id="footerTrackTitle" class="track-title">第一章 · 待播放</span>
+          <span class="track-sub">
+            <span class="telemetry-led"></span>
+            <span>NEURAL AUDIO CHANNEL</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 居中实时台词提词器 (Live Teleprompter Lyrics) -->
+      <div class="footer-teleprompter-center">
+        <span id="footerTeleprompterSpeaker" class="teleprompter-speaker">🎙️ 准备就绪</span>
+        <span id="footerTeleprompterLine" class="teleprompter-line">“导入文本后点击播放，此处将实时展示各角色演播台词与声音脉冲”</span>
+      </div>
+
+      <!-- 右侧控制项：时间码、状态与连播模式 -->
+      <div class="footer-controls-right">
+        <span id="footerTimecode" class="footer-timecode">00:00 / 00:00</span>
+        <span class="badge-role" style="font-size: 11px;">PRTS-SYNC</span>
+      </div>
+    </footer>
+
+    <!-- ================= 全局弹窗系统 (Modals & Drawers) ================= -->
+
+    <!-- 弹窗 1：Alexandria 风格章节剧本与台词对白编辑抽屉 -->
+    <div id="scriptDeckModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-xl" role="dialog" aria-modal="true" aria-labelledby="scriptDeckTitle">
+        <div class="modal-header">
+          <div>
+            <h3 id="scriptDeckTitle">章节剧本与台词对白检视</h3>
+            <p id="scriptDeckSubtitle" class="modal-sub">按句检视旁白与角色对白，支持点击试听、编辑台词、修改角色归属与语气基调</p>
+          </div>
+          <button class="modal-close" type="button" data-modal-close="scriptDeckModal" aria-label="关闭">&times;</button>
+        </div>
+
+        <div style="padding: 10px 20px; background: var(--panel-strong); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="scriptDeckSummary" style="font-size: 12.5px; font-weight: 600; color: var(--accent);">共 0 句</span>
+            <span style="font-size: 12px; color: var(--muted);">提示：可点击每句前的 ▶ 单独试听</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="reInferScriptBtn" class="ghost-button btn-sm" type="button" title="根据上下文重新自动推断本章台词归属">🔄 重新智能切分</button>
+            <button id="addScriptLineBtn" class="secondary-button btn-sm" type="button">➕ 插入新台词</button>
+            <button id="toggleBatchSpeakerBtn" class="secondary-button btn-sm" type="button" title="展开整章说话人批量替换工具">👥 批量替换说话人</button>
+            <button id="exportScriptSrtBtn" class="ghost-button btn-sm" type="button" title="导出专业带时间轴的 SRT 字幕">📝 导出 SRT 字幕</button>
+            <button id="exportScriptTxtBtn" class="ghost-button btn-sm" type="button" title="导出标准化剧组台词文本">📄 导出剧本 TXT</button>
+            <button id="saveScriptDeckBtn" class="primary-button btn-sm" type="button">💾 保存剧本修改</button>
+          </div>
+        </div>
+
+        <!-- 批量替换说话人抽屉工具栏 -->
+        <div id="batchSpeakerDrawer" style="display: none; padding: 12px 20px; background: rgba(0, 229, 255, 0.06); border-bottom: 1px solid var(--line);">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px;">
+            <span style="font-weight: 600; color: var(--accent);">👥 本章说话人批量重命名：</span>
+            <span>将原说话人</span>
+            <select id="batchFromSpeakerSelect" class="text-input text-input-sm" style="min-width: 140px;"></select>
+            <span>批量替换为</span>
+            <select id="batchToSpeakerSelect" class="text-input text-input-sm" style="min-width: 140px;"></select>
+            <button id="applyBatchSpeakerBtn" class="primary-button btn-sm" type="button">确认批量替换</button>
+          </div>
+        </div>
+
+        <div id="scriptDeckContent" class="script-deck-container" style="max-height: 60vh;">
+          <!-- 动态台词卡片列表 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 2：挑选微软内置角色音色 -->
+    <div id="msVoiceModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="catalogModalTitle">
+        <div class="modal-header">
+          <div>
+            <h3 id="catalogModalTitle">挑选角色演播音色 (AI漫剧 / GitHub开源 / 自创 / 微软)</h3>
+            <p class="modal-sub">按 AI漫剧爆款、开源大模型、男主、女主、中生、反派、童声等分类自由挑选与试听</p>
+          </div>
+          <button class="modal-close" type="button" data-modal-close="msVoiceModal" aria-label="关闭">&times;</button>
+        </div>
+
+        <div class="catalog-body">
+          <div class="catalog-sidebar">
+            <div class="catalog-nav-title">音色角色树</div>
+            <ul id="catalogCategoryList" class="catalog-category-list"></ul>
+          </div>
+          <div class="catalog-content">
+            <div class="catalog-filters">
+              <input id="catalogSearchInput" class="text-input text-input-sm" type="text" placeholder="搜索音色名称、角色风格..." />
+              <select id="catalogGenderFilter" class="text-input text-input-sm">
+                <option value="all">所有性别</option>
+                <option value="male">男声</option>
+                <option value="female">女声</option>
+              </select>
+            </div>
+            <div id="catalogVoiceGrid" class="catalog-voice-grid"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="secondary-button" type="button" data-modal-close="msVoiceModal">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 3：角色音色对调互换 -->
+    <div id="swapModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
+        <div class="modal-header">
+          <h3 id="swapTitle">与小说内其他角色对调音色</h3>
+          <button class="modal-close" type="button" data-modal-close="swapModal" aria-label="关闭">&times;</button>
+        </div>
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <p class="modal-tip">将当前选中的角色与另一位角色的音色、音高、语速及风格一键互换。</p>
+          <div class="swap-row-inputs">
+            <div class="form-group">
+              <label class="field-label">当前角色</label>
+              <input id="swapCharNameA" class="text-input" type="text" readonly />
+            </div>
+            <div class="swap-icon-center">⇄</div>
+            <div class="form-group">
+              <label class="field-label" for="swapTargetSelect">对调目标角色</label>
+              <select id="swapTargetSelect" class="text-input"></select>
+            </div>
+          </div>
+          <div class="modal-footer" style="padding: 12px 20px;">
+            <button class="secondary-button" type="button" data-modal-close="swapModal">取消</button>
+            <button id="confirmSwapBtn" class="primary-button" type="button">确认互换音色</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 4：手动添加角色 -->
+    <div id="addCharModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="addCharTitle">
+        <div class="modal-header">
+          <h3 id="addCharTitle">向当前小说添加自定义角色</h3>
+          <button class="modal-close" type="button" data-modal-close="addCharModal" aria-label="关闭">&times;</button>
+        </div>
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label class="field-label" for="newCharNameInput">角色姓名</label>
+            <input id="newCharNameInput" class="text-input" type="text" placeholder="例如：诸葛亮 / 孙悟空 / 小昭" />
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="newCharRoleSelect">人设分类</label>
+            <select id="newCharRoleSelect" class="text-input">
+              <option value="youngMale">青年男主</option>
+              <option value="youngFemale">青年女主</option>
+              <option value="mature">成熟中生</option>
+              <option value="elderVillain">长者反派</option>
+              <option value="child">少儿童声</option>
+              <option value="narrator">旁白演播</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="newCharVoiceSelect">默认音色</label>
+            <select id="newCharVoiceSelect" class="text-input"></select>
+          </div>
+          <div class="modal-footer" style="padding: 12px 20px;">
+            <button class="secondary-button" type="button" data-modal-close="addCharModal">取消</button>
+            <button id="confirmAddCharBtn" class="primary-button" type="button">确认添加到角色树</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 5：角色合并模态框 -->
+    <div id="mergeCharModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="mergeCharTitle">
+        <div class="modal-header">
+          <h3 id="mergeCharTitle">合并角色台词</h3>
+          <button class="modal-close" type="button" data-modal-close="mergeCharModal" aria-label="关闭">&times;</button>
+        </div>
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <p style="font-size: 13px; color: var(--text);">
+            将当前角色【<strong id="mergeSourceCharName" style="color: var(--accent);"></strong>】的全部台词归并至目标角色，并从角色树中移除源角色。
+          </p>
+          <div class="form-group">
+            <label class="field-label" for="mergeTargetCharSelect">选择合并目标角色</label>
+            <select id="mergeTargetCharSelect" class="text-input"></select>
+          </div>
+          <div class="modal-footer" style="padding: 12px 0 0 0;">
+            <button class="secondary-button" type="button" data-modal-close="mergeCharModal">取消</button>
+            <button id="confirmMergeBtn" class="primary-button" type="button">确认合并台词</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 6：全书角色声线体检与健康度诊断报告 -->
+    <div id="diagnoseModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="diagnoseModalTitle" style="max-width: 720px;">
+        <div class="modal-header">
+          <div>
+            <h3 id="diagnoseModalTitle">🩺 全书角色配音树健康度诊断</h3>
+            <p class="modal-sub">智能检测声线冲突、人设与音色匹配度、主役辨识度及混淆风险</p>
+          </div>
+          <button class="modal-close" type="button" data-modal-close="diagnoseModal" aria-label="关闭">&times;</button>
+        </div>
+
+        <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <!-- 总体健康评分卡 -->
+          <div id="healthScoreCard" class="health-score-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);">全书声线健康度总评</span>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 4px;">
+                  <span id="healthScoreNumber" class="health-score-big">92</span>
+                  <span id="healthScoreTag" class="badge-role" style="font-size: 13px;">良好 · 辨识度高</span>
+                </div>
+              </div>
+              <button id="autoOptimizeVoicesBtn" class="primary-button btn-sm" type="button" title="自动解决重叠冲突，为各角色分配专属音色">⚡ 一键智能优化分配</button>
+            </div>
+          </div>
+
+          <!-- 诊断详情列表 -->
+          <div style="font-size: 12px; font-weight: 600; color: var(--muted);">诊断检测项与改善建议：</div>
+          <div id="diagnoseItemsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto;">
+            <!-- 动态诊断卡 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="secondary-button" type="button" data-modal-close="diagnoseModal">关闭报告</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 7：A/B 声线对比试听实验室 -->
+    <div id="abCompareModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="abCompareTitle" style="max-width: 820px;">
+        <div class="modal-header">
+          <div>
+            <h3 id="abCompareTitle">⚖️ A/B 声线对比试听实验室</h3>
+            <p class="modal-sub">同句同调同测：对比两款声线的音质、共鸣、情感表现力，精挑最契合角色的声音</p>
+          </div>
+          <button class="modal-close" type="button" data-modal-close="abCompareModal" aria-label="关闭">&times;</button>
+        </div>
+
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <!-- 共享测试文本输入 -->
+          <div class="form-group">
+            <label class="field-label" for="abCompareSampleText">测试演播台词文本</label>
+            <input id="abCompareSampleText" class="text-input" type="text" value="“天地不仁，以万物为刍狗；日月经天，江河行地。”" placeholder="输入任意测试文本..." />
+            <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+              <button id="abSample1" class="ghost-button btn-sm" type="button">哲理沉思</button>
+              <button id="abSample2" class="ghost-button btn-sm" type="button">热血豪迈</button>
+              <button id="abSample3" class="ghost-button btn-sm" type="button">温情低语</button>
+              <button id="abSample4" class="ghost-button btn-sm" type="button">惊悚悬疑</button>
+            </div>
+          </div>
+
+          <!-- 双栏对比卡片 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <!-- A 声线 -->
+            <div class="workbench-card" style="padding: 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="color: var(--accent-cyan); font-size: 14px;">🅰️ 声线 A</strong>
+                <span id="abVoiceBadgeA" class="badge-voice">云希</span>
+              </div>
+              <label class="field-label" for="abVoiceSelectA">选择音色</label>
+              <select id="abVoiceSelectA" class="text-input text-input-sm"></select>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-top: 8px;">
+                <span>音高 (Pitch):</span>
+                <input id="abPitchA" type="range" min="0.8" max="1.3" step="0.05" value="1.0" style="width: 100px; accent-color: var(--accent-cyan);" />
+              </div>
+              <div style="margin-top: 14px;">
+                <button id="playAbVoiceABtn" class="primary-button btn-sm full-span" type="button">▶️ 试听声线 A</button>
+              </div>
+            </div>
+
+            <!-- B 声线 -->
+            <div class="workbench-card" style="padding: 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="color: var(--accent-gold); font-size: 14px;">🅱️ 声线 B</strong>
+                <span id="abVoiceBadgeB" class="badge-voice">云健</span>
+              </div>
+              <label class="field-label" for="abVoiceSelectB">选择音色</label>
+              <select id="abVoiceSelectB" class="text-input text-input-sm"></select>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-top: 8px;">
+                <span>音高 (Pitch):</span>
+                <input id="abPitchB" type="range" min="0.8" max="1.3" step="0.05" value="1.0" style="width: 100px; accent-color: var(--accent-gold);" />
+              </div>
+              <div style="margin-top: 14px;">
+                <button id="playAbVoiceBBtn" class="primary-button btn-sm full-span" type="button" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000;">▶️ 试听声线 B</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: var(--subtle);">💡 提示：A/B 对比能清晰听出两款声线在同一句台词上的基频厚度与发音细节</span>
+          <button class="secondary-button" type="button" data-modal-close="abCompareModal">关闭对比</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 8：快速移植向导弹窗 -->
+    <div id="quickTransplantModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="quickTransplantTitle">
+        <div class="modal-header">
+          <h3 id="quickTransplantTitle">⚡ 角色语音快速移植向导</h3>
+          <button class="modal-close" type="button" data-modal-close="quickTransplantModal" aria-label="关闭">&times;</button>
+        </div>
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label class="field-label" for="wizardSourceSelect">选择移植来源角色（过往小说 / 自建树 / 微软语音）</label>
+            <select id="wizardSourceSelect" class="text-input"></select>
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="wizardTargetSelect">选择接收音色的目标角色</label>
+            <select id="wizardTargetSelect" class="text-input"></select>
+          </div>
+          <div class="modal-footer" style="padding: 12px 0 0 0;">
+            <button class="secondary-button" type="button" data-modal-close="quickTransplantModal">取消</button>
+            <button id="confirmWizardTransplantBtn" class="primary-button" type="button">确认移植音色</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗 9：保存为自建角色树方案模态框 -->
+    <div id="saveCustomModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="saveCustomTitle">
+        <div class="modal-header">
+          <h3 id="saveCustomTitle">🌟 另存为自建角色音频树方案</h3>
+          <button class="modal-close" type="button" data-modal-close="saveCustomModal" aria-label="关闭">&times;</button>
+        </div>
+        <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label class="field-label" for="customSchemeNameInput">方案名称</label>
+            <input id="customSchemeNameInput" class="text-input" type="text" placeholder="例如：我的玄幻专属班底 / 双人言情剧本树" />
+          </div>
+          <div class="form-group">
+            <label class="field-label" for="customSchemeDescInput">方案简介</label>
+            <input id="customSchemeDescInput" class="text-input" type="text" placeholder="简要说明此配音树方案的特色..." />
+          </div>
+          <div class="modal-footer" style="padding: 12px 0 0 0;">
+            <button class="secondary-button" type="button" data-modal-close="saveCustomModal">取消</button>
+            <button id="confirmSaveCustomBtn" class="primary-button" type="button">保存为新方案</button>
+          </div>
+        </div>
+      </div>
+    <!-- 弹窗 10：自助录入/添加 GitHub 与外部开源语音树模态框 -->
+    <div id="addGitHubTreeModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="addGitHubTreeTitle" style="max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div>
+            <h3 id="addGitHubTreeTitle">🔮 自助录入与添加 GitHub / 开源语音树</h3>
+            <p style="margin: 2px 0 0; font-size: 12px; color: var(--muted);">零代码登记 GitHub 或任意外部开源语音大模型，配置角色声线、音色仿真映射与试听，一键保存至自建角色树库</p>
+          </div>
+          <button class="modal-close" type="button" data-modal-close="addGitHubTreeModal" aria-label="关闭">&times;</button>
+        </div>
+
+        <div class="modal-scroll-body" style="padding: 16px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+          <!-- 快捷预填预设 -->
+          <div style="background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: #38bdf8;">⚡ 快捷预填主流开源模版</div>
+              <div style="font-size: 11px; color: var(--muted);">选择主流开源语音项目快速载入仓库骨架与声线配置，支持自由增删微调</div>
+            </div>
+            <select id="githubPresetTemplateSelect" class="text-input text-input-sm" style="max-width: 260px; font-weight: 600;">
+              <option value="">-- 选择开源模版一键填入 --</option>
+              <option value="gptsovits_v2">RVC-Boss / GPT-SoVITS v2 (少样本克隆)</option>
+              <option value="cosyvoice_2">FunAudioLLM / CosyVoice-2 (Flow-Matching)</option>
+              <option value="chattts_novel">2noise / ChatTTS 小说对话增强版</option>
+              <option value="f5tts_epic">SWivid / F5-TTS 史诗仙侠漫剧版</option>
+              <option value="fishspeech_radio">fishaudio / Fish-Speech 广播拟真</option>
+              <option value="openvoice_v2">myshell-ai / OpenVoice 变声多语种</option>
+            </select>
+          </div>
+
+          <!-- 仓库基本信息 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="field-label" for="githubTreeRepoName">开源仓库 / 语音树名称 <span style="color: var(--accent);">*</span></label>
+              <input id="githubTreeRepoName" class="text-input" type="text" placeholder="例如：RVC-Boss/GPT-SoVITS 或 我的凡人修仙微调树" />
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="githubTreeRepoUrl">GitHub / HuggingFace 仓库链接</label>
+              <input id="githubTreeRepoUrl" class="text-input" type="text" placeholder="https://github.com/..." />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="field-label" for="githubTreeModelTech">底层技术架构 / 模型特性</label>
+              <input id="githubTreeModelTech" class="text-input" type="text" placeholder="例如：Few-Shot VITS + Diffusion / Flow Matching" />
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="githubTreeDesc">方案简述 / 适用题材</label>
+              <input id="githubTreeDesc" class="text-input" type="text" placeholder="例如：适合修仙、玄幻、冷峻男主与腹黑反派的多角色声线" />
+            </div>
+          </div>
+
+          <!-- 角色声线动态配置表格 -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="field-label" style="margin: 0; font-weight: 700; color: var(--text);">🎭 树内角色声线配置 (<span id="githubRoleCountLabel">0</span> 位)</label>
+              <div style="display: flex; gap: 8px;">
+                <button id="addGithubRoleRowBtn" class="secondary-button btn-sm" type="button" style="color: #10b981; border-color: rgba(16, 185, 129, 0.4);">➕ 添加角色声线</button>
+                <button id="toggleGithubJsonModeBtn" class="ghost-button btn-sm" type="button" title="切换 JSON 源码粘贴模式">📋 切换 JSON 模式</button>
+              </div>
+            </div>
+
+            <!-- JSON 源码粘贴模式容器 -->
+            <div id="githubJsonEditorContainer" style="display: none; margin-bottom: 12px;">
+              <textarea id="githubTreeJsonTextarea" class="raw-text" style="height: 180px; font-family: monospace; font-size: 12px;" placeholder="在此直接粘贴包含角色声线映射的 JSON 方案..."></textarea>
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+                <button id="applyGithubJsonBtn" class="secondary-button btn-sm" type="button">🔄 解析并载入到表单</button>
+              </div>
+            </div>
+
+            <!-- 可视化角色声线行列表 -->
+            <div id="githubRolesListWrap" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+              <!-- 动态渲染各角色卡片/行 -->
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: var(--muted);">保存后将自动注册到自建角色树及 GitHub 开源库，可直接拖拽混搭</span>
+          <div style="display: flex; gap: 10px;">
+            <button class="secondary-button" type="button" data-modal-close="addGitHubTreeModal">取消</button>
+            <button id="confirmSaveGithubTreeBtn" class="primary-button" type="button" style="background: linear-gradient(135deg, #0284c7, #2563eb);">💾 确认录入并生成开源树</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="./app.js" defer></script>
+
+    <!-- 核心逻辑脚本 (全模块无缝驱动) -->
+    <script src="./shared.js"></script>
+    <script src="./studio.js"></script>
+    <script src="./character-tree.js"></script>
+    <script src="./voice-library.js"></script>
   </body>
 </html>

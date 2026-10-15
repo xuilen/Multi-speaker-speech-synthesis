@@ -6,7 +6,7 @@ import re
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 SegmentType = Literal["narration", "dialogue"]
@@ -80,6 +80,11 @@ class SchemaBaseModel(BaseModel):
         def model_dump(self, mode: str = "python", **kwargs: object) -> dict[str, object]:
             return self.dict(**{key: value for key, value in kwargs.items() if key in {"include", "exclude", "by_alias", "exclude_unset", "exclude_defaults", "exclude_none"}})
 
+    if not hasattr(BaseModel, "model_copy"):
+
+        def model_copy(self, *, update: dict[str, object] | None = None, deep: bool = False) -> "SchemaBaseModel":
+            return self.copy(update=update, deep=deep)
+
 
 def _normalize_percent_value(value: object) -> str:
     if value is None or value == "":
@@ -109,8 +114,7 @@ class NovelChunk(SchemaBaseModel):
     start_char: int = Field(ge=0)
     end_char: int = Field(ge=0)
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
     @property
     def full_context(self) -> str:
@@ -122,21 +126,22 @@ class NovelChunk(SchemaBaseModel):
 class CharacterMetadata(SchemaBaseModel):
     """Character attributes inferred by the LLM for stable voice assignment."""
 
+    model_config = ConfigDict(extra="ignore")
+
     name: str = Field(min_length=1)
     gender: Gender = "unknown"
     age_group: AgeGroup = "unknown"
     role: CharacterRole = "unknown"
     traits: list[str] = Field(default_factory=list)
 
-    class Config:
-        extra = "ignore"
-
-    @validator("name", pre=True, allow_reuse=True)
+    @field_validator("name", mode="before")
+    @classmethod
     def normalize_name(cls, value: object) -> str:
         text = str(value or "").strip()
         return text or "未知角色"
 
-    @validator("gender", pre=True, allow_reuse=True)
+    @field_validator("gender", mode="before")
+    @classmethod
     def normalize_gender(cls, value: object) -> Gender:
         text = str(value or "unknown").strip().lower()
         if text in {"男", "男性", "male", "m"}:
@@ -145,7 +150,8 @@ class CharacterMetadata(SchemaBaseModel):
             return "female"
         return "unknown"
 
-    @validator("age_group", pre=True, allow_reuse=True)
+    @field_validator("age_group", mode="before")
+    @classmethod
     def normalize_age_group(cls, value: object) -> AgeGroup:
         text = str(value or "unknown").strip().lower()
         aliases = {
@@ -162,7 +168,8 @@ class CharacterMetadata(SchemaBaseModel):
         }
         return aliases.get(text, text if text in {"child", "young", "adult", "elder"} else "unknown")  # type: ignore[return-value]
 
-    @validator("role", pre=True, allow_reuse=True)
+    @field_validator("role", mode="before")
+    @classmethod
     def normalize_role(cls, value: object) -> CharacterRole:
         text = str(value or "unknown").strip().lower()
         aliases = {
@@ -178,6 +185,8 @@ class CharacterMetadata(SchemaBaseModel):
 class DialogueSegment(SchemaBaseModel):
     """One synthesis-ready narration or dialogue segment."""
 
+    model_config = ConfigDict(extra="ignore")
+
     index: int = Field(ge=0)
     speaker: str = Field(default="旁白", min_length=1)
     type: SegmentType
@@ -187,20 +196,20 @@ class DialogueSegment(SchemaBaseModel):
     rate_offset: str = "+0%"
     pitch_offset: str = "+0%"
 
-    class Config:
-        extra = "ignore"
-
-    @validator("speaker", pre=True, allow_reuse=True)
+    @field_validator("speaker", mode="before")
+    @classmethod
     def normalize_speaker(cls, value: object) -> str:
         speaker = str(value or "旁白").strip()
         return speaker or "旁白"
 
-    @validator("text", pre=True, allow_reuse=True)
+    @field_validator("text", mode="before")
+    @classmethod
     def normalize_text(cls, value: object) -> str:
         text = str(value or "").strip()
         return re.sub(r"\s+", " ", text)
 
-    @validator("emotion", pre=True, allow_reuse=True)
+    @field_validator("emotion", mode="before")
+    @classmethod
     def normalize_emotion(cls, value: object) -> str:
         style = str(value or "general").strip().lower()
         style = STYLE_ALIASES.get(style, style)
@@ -208,35 +217,39 @@ class DialogueSegment(SchemaBaseModel):
             return style
         return "serious"
 
-    @validator("rate_offset", "pitch_offset", pre=True, allow_reuse=True)
+    @field_validator("rate_offset", "pitch_offset", mode="before")
+    @classmethod
     def normalize_percent(cls, value: object) -> str:
         return _normalize_percent_value(value)
 
-    @validator("rate_offset", "pitch_offset", allow_reuse=True)
+    @field_validator("rate_offset", "pitch_offset")
+    @classmethod
     def validate_percent(cls, value: str) -> str:
         return _validate_percent_value(value)
 
-    @root_validator(skip_on_failure=True, allow_reuse=True)
-    def normalize_narration_speaker(cls, values: dict[str, object]) -> dict[str, object]:
-        if values.get("type") == "narration":
-            values["speaker"] = "旁白"
-        return values
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_narration_speaker(cls, data: object) -> object:
+        if isinstance(data, dict) and data.get("type") == "narration":
+            data["speaker"] = "旁白"
+        return data
 
 
 class ExtractionResult(SchemaBaseModel):
     """Validated LLM or heuristic extraction result for a single chunk."""
+
+    model_config = ConfigDict(extra="ignore")
 
     chunk_index: int = Field(ge=0)
     segments: list[DialogueSegment] = Field(default_factory=list)
     characters: list[CharacterMetadata] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 
-    class Config:
-        extra = "ignore"
-
 
 class VoiceConfig(SchemaBaseModel):
     """Persistent Azure voice assignment for one character."""
+
+    model_config = ConfigDict(extra="ignore")
 
     character_name: str
     voice_name: str
@@ -246,22 +259,25 @@ class VoiceConfig(SchemaBaseModel):
     base_style: str = "chat"
     rate_offset: str = "+0%"
     pitch_offset: str = "+0%"
+    category: str = "general"
+    display_name: str = ""
+    description: str = ""
     assigned_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
-    class Config:
-        extra = "ignore"
-
-    @validator("base_style", pre=True, allow_reuse=True)
+    @field_validator("base_style", mode="before")
+    @classmethod
     def normalize_style(cls, value: object) -> str:
         style = STYLE_ALIASES.get(str(value or "chat").strip().lower(), str(value or "chat").strip().lower())
         if style == "general" or style in AZURE_EXPRESSIVE_STYLES:
             return style
         return "chat"
 
-    @validator("rate_offset", "pitch_offset", pre=True, allow_reuse=True)
+    @field_validator("rate_offset", "pitch_offset", mode="before")
+    @classmethod
     def normalize_percent(cls, value: object) -> str:
         return _normalize_percent_value(value)
 
-    @validator("rate_offset", "pitch_offset", allow_reuse=True)
+    @field_validator("rate_offset", "pitch_offset")
+    @classmethod
     def validate_percent(cls, value: str) -> str:
         return _validate_percent_value(value)

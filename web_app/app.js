@@ -29,19 +29,478 @@
   };
 
   const ROLE_LABELS = {
-    narratorMale: "旁白男",
-    narratorFemale: "旁白女",
-    youngMale: "青年男",
-    youngFemale: "青年女",
+    narrator: "旁白演播",
+    youngMale: "青年男主",
+    youngFemale: "青年女主",
+    mature: "成熟中生",
     elderVillain: "长者/反派",
+    child: "少儿童声",
+    dialect: "方言特色",
   };
 
   const ROLE_DEFAULTS = {
-    narratorMale: { pitch: 0.92, rateOffset: -0.04, keywords: ["Yunxi", "云希", "Kangkang", "Male", "男"] },
-    narratorFemale: { pitch: 1.06, rateOffset: -0.02, keywords: ["Xiaoxiao", "晓晓", "Huihui", "Female", "女"] },
-    youngMale: { pitch: 1.0, rateOffset: 0.02, keywords: ["Yunjie", "云杰", "Kangkang", "Male", "男"] },
-    youngFemale: { pitch: 1.16, rateOffset: 0.04, keywords: ["Xiaoyi", "晓伊", "Xiaoxiao", "Female", "女"] },
-    elderVillain: { pitch: 0.78, rateOffset: -0.08, keywords: ["Yunze", "云泽", "Kangkang", "Male", "男"] },
+    narrator: { pitch: 0.95, rateOffset: -0.02, defaultVoice: "zh-CN-YunxiNeural", keywords: ["Yunxi", "云希", "Kangkang", "Male", "男"] },
+    youngMale: { pitch: 1.0, rateOffset: 0.02, defaultVoice: "zh-CN-YunjieNeural", keywords: ["Yunjie", "云杰", "Kangkang", "Male", "男"] },
+    youngFemale: { pitch: 1.12, rateOffset: 0.03, defaultVoice: "zh-CN-XiaohanNeural", keywords: ["Xiaohan", "晓涵", "Xiaoyi", "晓伊", "Xiaoxiao", "Female", "女"] },
+    mature: { pitch: 0.92, rateOffset: -0.02, defaultVoice: "zh-CN-YunyeNeural", keywords: ["Yunye", "云野", "Kangkang", "Male", "男"] },
+    elderVillain: { pitch: 0.8, rateOffset: -0.06, defaultVoice: "zh-CN-YunzeNeural", keywords: ["Yunze", "云泽", "Kangkang", "Male", "男"] },
+    child: { pitch: 1.25, rateOffset: 0.05, defaultVoice: "zh-CN-YunxiaNeural", keywords: ["Yunxia", "云夏", "Xiaoyou", "晓悠", "Female", "女"] },
+    dialect: { pitch: 1.0, rateOffset: 0.0, defaultVoice: "zh-CN-Shaanxi-XiaoniNeural", keywords: ["Xiaoni", "Xiaobei", "Yunxiang", "Female", "女"] },
+  };
+
+  const STYLE_LABELS = {
+    "chat": "自然对话 (chat)",
+    "narration-relaxed": "轻松叙事 (relaxed)",
+    "cheerful": "欢快喜悦 (cheerful)",
+    "serious": "严肃庄重 (serious)",
+    "angry": "怒气冲冲 (angry)",
+    "sad": "悲伤哀戚 (sad)",
+    "fearful": "恐惧颤抖 (fearful)",
+    "gentle": "温柔亲切 (gentle)",
+    "whispering": "低语耳语 (whispering)",
+    "sports-commentary": "激情解说 (commentary)",
+    "customerservice": "客气亲和 (service)",
+    "newscast": "播音专业 (newscast)",
+    "general": "通用标准 (general)",
+  };
+
+  // 微软语音全套分类角色树库 (Azure & Edge TTS)
+  const MS_VOICE_CATALOG = [
+    // 旁白演播
+    {
+      id: "zh-CN-YunxiNeural",
+      name: "云希",
+      fullName: "zh-CN-YunxiNeural",
+      gender: "male",
+      category: "narrator",
+      categoryLabel: "旁白演播",
+      archetype: "沉稳磁性 · 小说旁白主役",
+      tags: ["经典旁白", "多情感", "沉稳男声"],
+      styles: ["narration-relaxed", "cheerful", "angry", "sad", "serious", "fearful", "whispering", "depressed"],
+      defaultRate: 0,
+      defaultPitch: 0.96,
+      sampleText: "天地不仁，以万物为刍狗；日月经天，江河行地。",
+    },
+    {
+      id: "zh-CN-XiaoxiaoNeural",
+      name: "晓晓",
+      fullName: "zh-CN-XiaoxiaoNeural",
+      gender: "female",
+      category: "narrator",
+      categoryLabel: "旁白演播",
+      archetype: "温暖知性 · 柔和文学叙事",
+      tags: ["温暖女声", "多情感", "知性细腻"],
+      styles: ["narration-relaxed", "cheerful", "angry", "sad", "serious", "gentle", "affectionate"],
+      defaultRate: -0.02,
+      defaultPitch: 1.04,
+      sampleText: "微风拂过窗棂，那些沉封已久的故事，悄然拉开序幕。",
+    },
+    {
+      id: "zh-CN-YunjianNeural",
+      name: "云健",
+      fullName: "zh-CN-YunjianNeural",
+      gender: "male",
+      category: "narrator",
+      categoryLabel: "旁白演播",
+      archetype: "激情解说 · 评书演播",
+      tags: ["评书史诗", "解说", "高昂有力"],
+      styles: ["sports-commentary", "narration-relaxed", "serious"],
+      defaultRate: 0.02,
+      defaultPitch: 0.98,
+      sampleText: "话说天下大势，分久必合，合久必分！",
+    },
+    {
+      id: "zh-CN-XiaoqiuNeural",
+      name: "晓秋",
+      fullName: "zh-CN-XiaoqiuNeural",
+      gender: "female",
+      category: "narrator",
+      categoryLabel: "旁白演播",
+      archetype: "典雅深情 · 纪实文学朗诵",
+      tags: ["优雅从容", "文学朗读"],
+      styles: ["narration-relaxed", "gentle"],
+      defaultRate: -0.03,
+      defaultPitch: 0.98,
+      sampleText: "岁月如水流逝，唯有那座石桥依旧静默在烟雨之中。",
+    },
+    {
+      id: "zh-CN-YunyangNeural",
+      name: "云扬",
+      fullName: "zh-CN-YunyangNeural",
+      gender: "male",
+      category: "narrator",
+      categoryLabel: "旁白演播",
+      archetype: "端正庄重 · 播音主持",
+      tags: ["专业播音", "新闻端正"],
+      styles: ["newscast", "customerservice"],
+      defaultRate: 0,
+      defaultPitch: 1.0,
+      sampleText: "本台消息，今日江南一带细雨连绵，商道渐次畅通。",
+    },
+
+    // 青年男主
+    {
+      id: "zh-CN-YunjieNeural",
+      name: "云杰",
+      fullName: "zh-CN-YunjieNeural",
+      gender: "male",
+      category: "youngMale",
+      categoryLabel: "青年男主",
+      archetype: "热血少侠 · 少年意气男主",
+      tags: ["热血洒脱", "少年意气", "正派男主"],
+      styles: ["chat", "cheerful", "angry", "serious"],
+      defaultRate: 0.02,
+      defaultPitch: 1.0,
+      sampleText: "我若成佛，天下无魔；我若成魔，佛奈我何！",
+    },
+    {
+      id: "zh-CN-YunfengNeural",
+      name: "云枫",
+      fullName: "zh-CN-YunfengNeural",
+      gender: "male",
+      category: "youngMale",
+      categoryLabel: "青年男主",
+      archetype: "温润公子 · 儒雅深情书生",
+      tags: ["温文尔雅", "深情内敛"],
+      styles: ["chat", "sad", "gentle"],
+      defaultRate: -0.02,
+      defaultPitch: 1.02,
+      sampleText: "浮生若梦，若能护得所爱之人周全，此生足矣。",
+    },
+    {
+      id: "zh-CN-YunhaoNeural",
+      name: "云皓",
+      fullName: "zh-CN-YunhaoNeural",
+      gender: "male",
+      category: "youngMale",
+      categoryLabel: "青年男主",
+      archetype: "朝气蓬勃 · 阳光机敏男青年",
+      tags: ["活力自信", "阳光幽默"],
+      styles: ["chat", "cheerful", "excited"],
+      defaultRate: 0.04,
+      defaultPitch: 1.02,
+      sampleText: "别担心，前面的路就算再凶险，有我陪你闯过去！",
+    },
+
+    // 青年女主
+    {
+      id: "zh-CN-XiaohanNeural",
+      name: "晓涵",
+      fullName: "zh-CN-XiaohanNeural",
+      gender: "female",
+      category: "youngFemale",
+      categoryLabel: "青年女主",
+      archetype: "清纯柔美 · 出尘仙子女主",
+      tags: ["灵动清纯", "多情感", "女主首选"],
+      styles: ["gentle", "sad", "cheerful", "fearful", "affectionate"],
+      defaultRate: 0.02,
+      defaultPitch: 1.1,
+      sampleText: "哪怕踏遍天涯海角，我也一定要找到当年的真相。",
+    },
+    {
+      id: "zh-CN-XiaoyiNeural",
+      name: "晓伊",
+      fullName: "zh-CN-XiaoyiNeural",
+      gender: "female",
+      category: "youngFemale",
+      categoryLabel: "青年女主",
+      archetype: "活泼灵动 · 傲娇机敏少女",
+      tags: ["清脆悦耳", "娇俏灵动"],
+      styles: ["chat", "cheerful", "angry"],
+      defaultRate: 0.04,
+      defaultPitch: 1.15,
+      sampleText: "哼，本姑娘才不稀罕你的好意呢，不过既然你开口了……",
+    },
+    {
+      id: "zh-CN-XiaoshuangNeural",
+      name: "晓双",
+      fullName: "zh-CN-XiaoshuangNeural",
+      gender: "female",
+      category: "youngFemale",
+      categoryLabel: "青年女主",
+      archetype: "娇俏软萌 · 天真灵动师妹",
+      tags: ["娇憨软萌", "少女闺蜜"],
+      styles: ["cheerful"],
+      defaultRate: 0.04,
+      defaultPitch: 1.18,
+      sampleText: "哇！师兄你快看，那边的桃花开得好漂亮呀！",
+    },
+
+    // 成熟中生
+    {
+      id: "zh-CN-YunyeNeural",
+      name: "云野",
+      fullName: "zh-CN-YunyeNeural",
+      gender: "male",
+      category: "mature",
+      categoryLabel: "成熟中生",
+      archetype: "豪迈宗师 · 威严将领硬汉",
+      tags: ["霸气威严", "厚重有力"],
+      styles: ["serious", "angry", "cheerful"],
+      defaultRate: -0.02,
+      defaultPitch: 0.92,
+      sampleText: "三尺青锋在此，犯我山门者，杀无赦！",
+    },
+    {
+      id: "zh-CN-XiaoruiNeural",
+      name: "晓睿",
+      fullName: "zh-CN-XiaoruiNeural",
+      gender: "female",
+      category: "mature",
+      categoryLabel: "成熟中生",
+      archetype: "冷静睿智 · 女掌门御姐",
+      tags: ["干练从容", "睿智女强人"],
+      styles: ["serious", "calm"],
+      defaultRate: -0.02,
+      defaultPitch: 0.98,
+      sampleText: "成大事者不恤小耻，局势已定，容不得半分优柔寡断。",
+    },
+    {
+      id: "zh-CN-XiaozhenNeural",
+      name: "晓甄",
+      fullName: "zh-CN-XiaozhenNeural",
+      gender: "female",
+      category: "mature",
+      categoryLabel: "成熟中生",
+      archetype: "雍容华贵 · 端庄贵妇掌门",
+      tags: ["优雅典雅", "母仪天下"],
+      styles: ["narration-relaxed", "gentle"],
+      defaultRate: -0.03,
+      defaultPitch: 0.98,
+      sampleText: "在这深宫之中，唯有沉静自持，方能走得长远。",
+    },
+    {
+      id: "zh-CN-XiaoyanNeural",
+      name: "晓颜",
+      fullName: "zh-CN-XiaoyanNeural",
+      gender: "female",
+      category: "mature",
+      categoryLabel: "成熟中生",
+      archetype: "温良温厚 · 贤淑长辈慈母",
+      tags: ["亲切慈爱", "温婉从容"],
+      styles: ["customerservice", "gentle"],
+      defaultRate: -0.01,
+      defaultPitch: 1.02,
+      sampleText: "快趁热喝了这碗参汤吧，身子骨要紧。",
+    },
+
+    // 长者反派
+    {
+      id: "zh-CN-YunzeNeural",
+      name: "云泽",
+      fullName: "zh-CN-YunzeNeural",
+      gender: "male",
+      category: "elderVillain",
+      categoryLabel: "长者反派",
+      archetype: "沧桑老者 · 阴冷魔头宿敌",
+      tags: ["阴鸷深沉", "苍老威严", "经典反派"],
+      styles: ["serious", "angry", "depressed"],
+      defaultRate: -0.06,
+      defaultPitch: 0.82,
+      sampleText: "桀桀桀……年轻人，你以为凭你那点微末道行，能翻得了天吗？",
+    },
+    {
+      id: "zh-CN-XiaomoNeural",
+      name: "晓墨",
+      fullName: "zh-CN-XiaomoNeural",
+      gender: "female",
+      category: "elderVillain",
+      categoryLabel: "长者反派",
+      archetype: "诡谲老妪 · 阴鸷狠绝魔女",
+      tags: ["变声多面", "阴郁诡谲"],
+      styles: ["chat", "serious", "angry", "depressed", "whispering"],
+      defaultRate: -0.04,
+      defaultPitch: 0.88,
+      sampleText: "既然落入了老身的幽冥幻境，就休想活着走出去！",
+    },
+
+    // 少儿童声
+    {
+      id: "zh-CN-YunxiaNeural",
+      name: "云夏",
+      fullName: "zh-CN-YunxiaNeural",
+      gender: "male",
+      category: "child",
+      categoryLabel: "少儿童声",
+      archetype: "淘气正太 · 机敏道童灵兽",
+      tags: ["机灵调皮", "天真童声"],
+      styles: ["cheerful"],
+      defaultRate: 0.04,
+      defaultPitch: 1.25,
+      sampleText: "主人主人！快醒醒，前面的山洞里好像藏着大宝贝！",
+    },
+    {
+      id: "zh-CN-XiaoyouNeural",
+      name: "晓悠",
+      fullName: "zh-CN-XiaoyouNeural",
+      gender: "female",
+      category: "child",
+      categoryLabel: "少儿童声",
+      archetype: "软萌萝莉 · 纯真可爱女童",
+      tags: ["天真软糯", "童话伴读"],
+      styles: ["cheerful", "gentle"],
+      defaultRate: 0.02,
+      defaultPitch: 1.3,
+      sampleText: "大哥哥，月亮升起来了，你答应给我讲的神仙故事呢？",
+    },
+
+    // 方言特色
+    {
+      id: "zh-CN-Shaanxi-XiaoniNeural",
+      name: "陕西晓妮",
+      fullName: "zh-CN-Shaanxi-XiaoniNeural",
+      gender: "female",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "关中风味 · 豪爽秦腔质朴",
+      tags: ["陕西方言", "质朴嘹亮"],
+      styles: ["general"],
+      defaultRate: 0,
+      defaultPitch: 1.0,
+      sampleText: "额跟你说，这事情可马虎不得，咱得办得稳稳当当的！",
+    },
+    {
+      id: "zh-CN-Liaoning-XiaobeiNeural",
+      name: "辽宁晓北",
+      fullName: "zh-CN-Liaoning-XiaobeiNeural",
+      gender: "female",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "东北老铁 · 幽默接地气",
+      tags: ["东北方言", "风趣幽默"],
+      styles: ["cheerful"],
+      defaultRate: 0.02,
+      defaultPitch: 1.02,
+      sampleText: "哎呀妈呀，老铁这可老厉害了，妥妥的没毛病！",
+    },
+    {
+      id: "zh-CN-Sichuan-YunxiNeural",
+      name: "四川云希",
+      fullName: "zh-CN-Sichuan-YunxiNeural",
+      gender: "male",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "巴适麻辣 · 川味灵动风情",
+      tags: ["四川方言", "巴适灵动"],
+      styles: ["chat"],
+      defaultRate: 0,
+      defaultPitch: 1.0,
+      sampleText: "莫慌嘛，吃碗麻辣小面，摆摆龙门阵，巴适得板！",
+    },
+    {
+      id: "zh-CN-Shandong-YunxiangNeural",
+      name: "山东云翔",
+      fullName: "zh-CN-Shandong-YunxiangNeural",
+      gender: "male",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "齐鲁淳朴 · 忠厚实诚好汉",
+      tags: ["山东方言", "厚道淳朴"],
+      styles: ["chat"],
+      defaultRate: 0,
+      defaultPitch: 0.96,
+      sampleText: "俺们庄户人家讲究的就是一个实诚，答应你的事绝不反悔！",
+    },
+    {
+      id: "zh-HK-WanLungNeural",
+      name: "香港云龙",
+      fullName: "zh-HK-WanLungNeural",
+      gender: "male",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "港风豪杰 · 粤语评书叙事",
+      tags: ["粤语男声", "港风评书"],
+      styles: ["general"],
+      defaultRate: -0.01,
+      defaultPitch: 0.98,
+      sampleText: "江湖風雲變幻莫測，今日一別，不知何日再相逢。",
+    },
+    {
+      id: "zh-TW-HsiaoChenNeural",
+      name: "台湾晓臻",
+      fullName: "zh-TW-HsiaoChenNeural",
+      gender: "female",
+      category: "dialect",
+      categoryLabel: "方言特色",
+      archetype: "台湾腔国语 · 甜美柔和细腻",
+      tags: ["台湾腔女声", "细腻深情"],
+      styles: ["general"],
+      defaultRate: 0,
+      defaultPitch: 1.04,
+      sampleText: "其實只要大家平平安安的，心裡就覺得好溫暖喔。",
+    },
+  ];
+
+  const MS_VOICE_MAP = {};
+  MS_VOICE_CATALOG.forEach((v) => {
+    MS_VOICE_MAP[v.id] = v;
+  });
+
+  const MS_VOICE_TREE = {
+    all: { key: "all", label: "🌟 全部音色", description: "微软全部 24+ 款小说精选音色" },
+    narrator: { key: "narrator", label: "🎙️ 旁白演播", description: "沉稳磁性、温暖知性、激情评书解说" },
+    youngMale: { key: "youngMale", label: "⚔️ 青年男主", description: "热血少侠、温润书生、阳光青年主角" },
+    youngFemale: { key: "youngFemale", label: "🌸 青年女主", description: "清纯柔美、出尘仙子、灵动傲娇少女" },
+    mature: { key: "mature", label: "🛡️ 成熟中生", description: "豪迈宗师、冷静御姐、威严将领、慈祥长辈" },
+    elderVillain: { key: "elderVillain", label: "👹 长者反派", description: "沧桑老仙、阴冷魔皇、诡谲绝世宿敌" },
+    child: { key: "child", label: "🎈 少儿童声", description: "机敏道童、软萌萝莉、可爱灵兽童音" },
+    dialect: { key: "dialect", label: "🗺️ 方言特色", description: "陕西、东北、四川、山东、粤语、台湾风情" },
+  };
+
+  // 内置经典小说配音树方案
+  const BUILTIN_SCHEMES = {
+    "xianxia": {
+      id: "xianxia",
+      name: "🔮 玄幻修仙配音树",
+      description: "适合修仙、玄幻、洪荒小说，仙侠意境浓郁，神魔宗师分明",
+      archetypes: {
+        narrator: { voiceName: "zh-CN-YunxiNeural", pitch: 0.94, rateOffset: -0.02, baseStyle: "narration-relaxed" },
+        youngMale: { voiceName: "zh-CN-YunjieNeural", pitch: 1.0, rateOffset: 0.02, baseStyle: "chat" },
+        youngFemale: { voiceName: "zh-CN-XiaohanNeural", pitch: 1.1, rateOffset: 0.02, baseStyle: "gentle" },
+        mature: { voiceName: "zh-CN-YunyeNeural", pitch: 0.92, rateOffset: -0.02, baseStyle: "serious" },
+        elderVillain: { voiceName: "zh-CN-YunzeNeural", pitch: 0.8, rateOffset: -0.06, baseStyle: "serious" },
+        child: { voiceName: "zh-CN-YunxiaNeural", pitch: 1.25, rateOffset: 0.04, baseStyle: "cheerful" },
+      },
+    },
+    "historical": {
+      id: "historical",
+      name: "⚔️ 三国历史演义配音树",
+      description: "适合历史、三国、战国、楚汉等波澜壮阔的史诗小说",
+      archetypes: {
+        narrator: { voiceName: "zh-CN-YunjianNeural", pitch: 0.96, rateOffset: -0.02, baseStyle: "sports-commentary" },
+        youngMale: { voiceName: "zh-CN-YunfengNeural", pitch: 1.0, rateOffset: -0.01, baseStyle: "gentle" },
+        youngFemale: { voiceName: "zh-CN-XiaohanNeural", pitch: 1.08, rateOffset: 0.0, baseStyle: "sad" },
+        mature: { voiceName: "zh-CN-YunyeNeural", pitch: 0.92, rateOffset: 0.02, baseStyle: "serious" },
+        elderVillain: { voiceName: "zh-CN-YunzeNeural", pitch: 0.8, rateOffset: -0.04, baseStyle: "serious" },
+        child: { voiceName: "zh-CN-YunxiaNeural", pitch: 1.2, rateOffset: 0.02, baseStyle: "cheerful" },
+      },
+    },
+    "romance": {
+      id: "romance",
+      name: "🌸 现代都市言情配音树",
+      description: "适合都市甜宠、职场成长、现代情感轻喜剧",
+      archetypes: {
+        narrator: { voiceName: "zh-CN-XiaoxiaoNeural", pitch: 1.02, rateOffset: 0.0, baseStyle: "narration-relaxed" },
+        youngMale: { voiceName: "zh-CN-YunxiNeural", pitch: 0.95, rateOffset: -0.02, baseStyle: "serious" },
+        youngFemale: { voiceName: "zh-CN-XiaohanNeural", pitch: 1.08, rateOffset: 0.02, baseStyle: "chat" },
+        mature: { voiceName: "zh-CN-XiaoruiNeural", pitch: 0.98, rateOffset: -0.02, baseStyle: "calm" },
+        elderVillain: { voiceName: "zh-CN-XiaomoNeural", pitch: 0.88, rateOffset: -0.04, baseStyle: "whispering" },
+        child: { voiceName: "zh-CN-XiaoyouNeural", pitch: 1.25, rateOffset: 0.02, baseStyle: "cheerful" },
+      },
+    },
+    "mystery": {
+      id: "mystery",
+      name: "🕵️ 悬疑惊悚破案配音树",
+      description: "适合悬疑探案、密室解谜、惊悚民俗小说",
+      archetypes: {
+        narrator: { voiceName: "zh-CN-YunxiNeural", pitch: 0.9, rateOffset: -0.04, baseStyle: "serious" },
+        youngMale: { voiceName: "zh-CN-YunfengNeural", pitch: 0.98, rateOffset: -0.02, baseStyle: "serious" },
+        youngFemale: { voiceName: "zh-CN-XiaohanNeural", pitch: 1.1, rateOffset: 0.02, baseStyle: "fearful" },
+        mature: { voiceName: "zh-CN-YunyeNeural", pitch: 0.9, rateOffset: -0.02, baseStyle: "serious" },
+        elderVillain: { voiceName: "zh-CN-XiaomoNeural", pitch: 0.85, rateOffset: -0.05, baseStyle: "whispering" },
+        child: { voiceName: "zh-CN-XiaoyouNeural", pitch: 1.2, rateOffset: 0.0, baseStyle: "fearful" },
+      },
+    },
   };
 
   const els = {};
@@ -57,6 +516,11 @@
     onlineAbort: null,
     refreshTimer: null,
     toastTimer: null,
+    // 角色配音树与方案扩展状态
+    catalogFilter: { category: "all", gender: "all", query: "" },
+    catalogTargetSpeaker: null,
+    userSchemes: loadUserSchemes(),
+    pendingImportScheme: null,
   };
 
   document.addEventListener("DOMContentLoaded", init);
@@ -68,13 +532,13 @@
     refreshVoices();
     updateSupportStatus();
     updateModeNotice();
+    renderSchemeOptions();
     renderAll();
 
     if ("speechSynthesis" in window) {
       window.speechSynthesis.addEventListener("voiceschanged", () => {
         refreshVoices();
-        rebuildSpeakerSettings();
-        renderVoiceTable();
+        renderVoiceTree();
       });
     }
   }
@@ -104,8 +568,17 @@
       "rateSlider",
       "rateValue",
       "speakerModeToggle",
+      "openVoiceCatalogButton",
+      "openSwapModalButton",
+      "voiceSchemeSelect",
+      "userSchemesOptgroup",
+      "applySchemeButton",
+      "saveSchemeButton",
+      "exportSchemeButton",
+      "importSchemeButton",
+      "schemeFileInput",
       "refreshVoicesButton",
-      "voiceTable",
+      "characterVoiceTree",
       "progressText",
       "activeStatus",
       "overallProgress",
@@ -116,6 +589,34 @@
       "zipButton",
       "supportStatus",
       "toast",
+      // 模态弹窗
+      "msVoiceModal",
+      "catalogCategoryList",
+      "catalogSearchInput",
+      "catalogGenderFilter",
+      "catalogTargetNotice",
+      "catalogTargetCharName",
+      "catalogVoiceGrid",
+      "swapTransferModal",
+      "tabSwapBtn",
+      "tabTransferBtn",
+      "tabSwapContent",
+      "tabTransferContent",
+      "swapSelectA",
+      "swapSelectB",
+      "swapPreviewArea",
+      "confirmSwapBtn",
+      "transferSourceSelect",
+      "transferTargetSelect",
+      "confirmTransferBtn",
+      "schemeImportModal",
+      "importSchemeMeta",
+      "schemeMappingBody",
+      "confirmImportSchemeBtn",
+      "saveSchemeModal",
+      "saveSchemeNameInput",
+      "saveSchemeDescInput",
+      "confirmSaveSchemeBtn",
     ].forEach((id) => {
       els[id] = document.getElementById(id);
     });
@@ -139,25 +640,72 @@
     });
     els.speakerModeToggle.addEventListener("change", () => {
       rebuildSpeakerSettings();
-      renderVoiceTable();
+      renderVoiceTree();
     });
+
+    // 配音方案工具栏
+    els.applySchemeButton.addEventListener("click", handleApplySchemeFromSelect);
+    els.saveSchemeButton.addEventListener("click", openSaveSchemeModal);
+    els.exportSchemeButton.addEventListener("click", exportCurrentScheme);
+    els.importSchemeButton.addEventListener("click", () => els.schemeFileInput.click());
+    els.schemeFileInput.addEventListener("change", handleSchemeFileChange);
     els.refreshVoicesButton.addEventListener("click", () => {
       refreshVoices();
-      rebuildSpeakerSettings();
-      renderVoiceTable();
-      toast("已刷新浏览器音色列表。");
+      toast("已刷新浏览器语音引擎列表。");
+      renderVoiceTree();
     });
+
+    // 微软音色树库与互换弹窗入口
+    els.openVoiceCatalogButton.addEventListener("click", () => openVoiceCatalog(null));
+    els.openSwapModalButton.addEventListener("click", () => openSwapTransferModal("swap"));
+
+    // 章节生成与导出
     els.generateSelectedButton.addEventListener("click", generateSelectedChapters);
     els.pauseButton.addEventListener("click", pauseWork);
     els.resumeButton.addEventListener("click", resumeWork);
     els.stopButton.addEventListener("click", stopWork);
     els.zipButton.addEventListener("click", downloadGeneratedZip);
 
+    // 列表事件代理
     els.chapterList.addEventListener("click", handleChapterClick);
     els.chapterList.addEventListener("change", handleChapterChange);
     els.chapterList.addEventListener("input", handleChapterInput);
-    els.voiceTable.addEventListener("change", handleVoiceChange);
-    els.voiceTable.addEventListener("input", handleVoiceChange);
+
+    // 角色搭配树卡片事件代理
+    els.characterVoiceTree.addEventListener("click", handleVoiceTreeClick);
+    els.characterVoiceTree.addEventListener("change", handleVoiceTreeChange);
+    els.characterVoiceTree.addEventListener("input", handleVoiceTreeInput);
+
+    // 模态弹窗全局关闭按钮
+    document.querySelectorAll("[data-modal-close]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const modalId = btn.dataset.modalClose;
+        closeModal(modalId);
+      });
+    });
+
+    // 微软音色库弹窗内部事件
+    els.catalogSearchInput.addEventListener("input", () => {
+      state.catalogFilter.query = els.catalogSearchInput.value.trim().toLowerCase();
+      renderCatalogVoices();
+    });
+    els.catalogGenderFilter.addEventListener("change", () => {
+      state.catalogFilter.gender = els.catalogGenderFilter.value;
+      renderCatalogVoices();
+    });
+    els.catalogVoiceGrid.addEventListener("click", handleCatalogVoiceClick);
+
+    // 互换/移植弹窗选项卡与操作
+    els.tabSwapBtn.addEventListener("click", () => switchSwapTab("swap"));
+    els.tabTransferBtn.addEventListener("click", () => switchSwapTab("transfer"));
+    els.swapSelectA.addEventListener("change", updateSwapPreview);
+    els.swapSelectB.addEventListener("change", updateSwapPreview);
+    els.confirmSwapBtn.addEventListener("click", handleConfirmSwap);
+    els.confirmTransferBtn.addEventListener("click", handleConfirmTransfer);
+
+    // 方案保存与导入弹窗
+    els.confirmSaveSchemeBtn.addEventListener("click", handleConfirmSaveScheme);
+    els.confirmImportSchemeBtn.addEventListener("click", handleConfirmImportScheme);
   }
 
   function applyTheme(theme) {
@@ -167,13 +715,901 @@
     els.themeToggle.title = theme === "dark" ? "切换浅色" : "切换深色";
   }
 
+  /* -------------------------------------------------------------
+     方案与持久化数据管理 (User Schemes & Storage)
+  ------------------------------------------------------------- */
+  function loadUserSchemes() {
+    try {
+      const raw = localStorage.getItem("novelTtsUserSchemes");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveUserSchemes(schemes) {
+    state.userSchemes = schemes;
+    try {
+      localStorage.setItem("novelTtsUserSchemes", JSON.stringify(schemes));
+    } catch {
+      // ignore
+    }
+    renderSchemeOptions();
+  }
+
+  function renderSchemeOptions() {
+    if (!els.userSchemesOptgroup) return;
+    const keys = Object.keys(state.userSchemes);
+    if (!keys.length) {
+      els.userSchemesOptgroup.innerHTML = '<option disabled>暂无自定义方案</option>';
+      return;
+    }
+    els.userSchemesOptgroup.innerHTML = keys
+      .map((k) => `<option value="user:${escapeAttr(k)}">📁 ${escapeHtml(state.userSchemes[k].name || k)}</option>`)
+      .join("");
+  }
+
+  function handleApplySchemeFromSelect() {
+    const val = els.voiceSchemeSelect.value;
+    if (!val) return;
+    if (val.startsWith("builtin:")) {
+      const key = val.replace("builtin:", "");
+      applyBuiltinScheme(key);
+    } else if (val.startsWith("user:")) {
+      const key = val.replace("user:", "");
+      applyUserScheme(key);
+    }
+  }
+
+  function applyBuiltinScheme(key) {
+    const preset = BUILTIN_SCHEMES[key];
+    if (!preset) return;
+    const speakers = currentSpeakers();
+    speakers.forEach((speaker) => {
+      const setting = state.speakerSettings.get(speaker);
+      if (!setting) return;
+      const archetype = preset.archetypes[setting.role] || preset.archetypes.youngMale;
+      if (archetype) {
+        setting.voiceName = archetype.voiceName;
+        setting.pitch = archetype.pitch;
+        setting.rateOffset = archetype.rateOffset;
+        setting.baseStyle = archetype.baseStyle;
+      }
+    });
+    renderVoiceTree();
+    toast(`已应用内置【${preset.name}】配音树方案！`);
+  }
+
+  function applyUserScheme(key) {
+    const scheme = state.userSchemes[key];
+    if (!scheme) return;
+    applySchemePayload(scheme);
+    toast(`已应用自定义方案【${scheme.name}】！`);
+  }
+
+  function applySchemePayload(scheme, mapping = null) {
+    const charsDict = scheme.characters || {};
+    const map = mapping || {};
+    const currentList = currentSpeakers();
+
+    currentList.forEach((speaker) => {
+      // Find matching entry from scheme (either by mapping or exact name match)
+      let matchedData = null;
+      for (const [schemeChar, val] of Object.entries(charsDict)) {
+        if (map[schemeChar] === speaker || schemeChar === speaker) {
+          matchedData = val;
+          break;
+        }
+      }
+
+      if (matchedData) {
+        const setting = state.speakerSettings.get(speaker);
+        if (setting) {
+          if (matchedData.voice_name || matchedData.voiceName) {
+            setting.voiceName = matchedData.voice_name || matchedData.voiceName;
+          }
+          if (matchedData.base_style || matchedData.baseStyle) {
+            setting.baseStyle = matchedData.base_style || matchedData.baseStyle;
+          }
+          if (typeof matchedData.pitch === "number") setting.pitch = matchedData.pitch;
+          if (typeof matchedData.rateOffset === "number") setting.rateOffset = matchedData.rateOffset;
+          if (matchedData.role) setting.role = matchedData.role;
+        }
+      }
+    });
+
+    renderVoiceTree();
+  }
+
+  function openSaveSchemeModal() {
+    const book = bookTitle();
+    els.saveSchemeNameInput.value = `${book} 配音树方案`;
+    els.saveSchemeDescInput.value = `由小说《${book}》当前角色配音搭配导出生成`;
+    openModal("saveSchemeModal");
+  }
+
+  function handleConfirmSaveScheme() {
+    const name = els.saveSchemeNameInput.value.trim();
+    if (!name) {
+      toast("请输入方案名称。");
+      return;
+    }
+    const desc = els.saveSchemeDescInput.value.trim();
+    const characters = {};
+    state.speakerSettings.forEach((setting, speaker) => {
+      characters[speaker] = {
+        character_name: speaker,
+        voice_name: setting.voiceName,
+        role: setting.role,
+        gender: inferGender(speaker),
+        base_style: setting.baseStyle,
+        pitch: setting.pitch,
+        rate_offset: `${setting.rateOffset >= 0 ? "+" : ""}${Math.round(setting.rateOffset * 100)}%`,
+        rateOffset: setting.rateOffset,
+      };
+    });
+
+    const id = `scheme_${Date.now()}`;
+    state.userSchemes[id] = {
+      id,
+      name,
+      description: desc,
+      characters,
+      savedAt: new Date().toISOString(),
+    };
+    saveUserSchemes(state.userSchemes);
+    closeModal("saveSchemeModal");
+    toast(`方案【${name}】已保存到本地方案库！`);
+  }
+
+  function exportCurrentScheme() {
+    const characters = {};
+    state.speakerSettings.forEach((setting, speaker) => {
+      const msVoice = MS_VOICE_MAP[setting.voiceName];
+      characters[speaker] = {
+        character_name: speaker,
+        voice_name: setting.voiceName,
+        voice_display: msVoice?.name || setting.voiceName,
+        role: setting.role,
+        gender: inferGender(speaker),
+        base_style: setting.baseStyle,
+        pitch: setting.pitch,
+        rateOffset: setting.rateOffset,
+        rate_offset: `${setting.rateOffset >= 0 ? "+" : ""}${Math.round(setting.rateOffset * 100)}%`,
+      };
+    });
+
+    const payload = {
+      version: 2,
+      scheme_name: `${bookTitle()} 角色配音树`,
+      book_title: bookTitle(),
+      exported_at: new Date().toISOString(),
+      character_count: Object.keys(characters).length,
+      characters,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    downloadBlob(blob, `${sanitizeFileName(bookTitle())}_角色配音树.json`);
+    toast("已成功导出当前小说的角色配音树 JSON 文件！可直接移植到其他小说。");
+  }
+
+  async function handleSchemeFileChange(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      event.target.value = "";
+      state.pendingImportScheme = data;
+      openSchemeImportModal(data);
+    } catch (err) {
+      toast(`导入失败：无法解析 JSON 文件 (${friendlyError(err)})`);
+    }
+  }
+
+  function openSchemeImportModal(scheme) {
+    const chars = scheme.characters || {};
+    const count = Object.keys(chars).length;
+    els.importSchemeMeta.innerHTML = `
+      <strong>方案名称：</strong>${escapeHtml(scheme.scheme_name || "未命名方案")} &nbsp;·&nbsp; 
+      <strong>角色数量：</strong>${count} 个 &nbsp;·&nbsp;
+      <strong>说明：</strong>${escapeHtml(scheme.description || "外来小说配音树文件")}
+    `;
+
+    const currentSpeakersList = currentSpeakers();
+    const rows = [];
+
+    for (const [schemeChar, charData] of Object.entries(chars)) {
+      const voiceId = charData.voice_name || charData.voiceName || "";
+      const msVoice = MS_VOICE_MAP[voiceId];
+      const voiceLabel = msVoice ? `${msVoice.name} (${voiceId})` : voiceId;
+      const role = charData.role || inferRole(schemeChar);
+      const roleLabel = ROLE_LABELS[role] || role;
+
+      // Smart auto-matching candidate: exact name or role match
+      let bestMatch = "";
+      if (currentSpeakersList.includes(schemeChar)) {
+        bestMatch = schemeChar;
+      } else {
+        const candidate = currentSpeakersList.find((s) => inferRole(s) === role);
+        if (candidate) bestMatch = candidate;
+      }
+
+      rows.push(`
+        <tr data-scheme-char="${escapeAttr(schemeChar)}">
+          <td>
+            <strong>${escapeHtml(schemeChar)}</strong>
+            <div style="font-size:11px;color:var(--muted);">${escapeHtml(voiceLabel)}</div>
+          </td>
+          <td>
+            <span class="char-badge char-badge-role">${escapeHtml(roleLabel)}</span>
+          </td>
+          <td>
+            <select class="text-input text-input-sm scheme-target-select">
+              <option value="">-- 不导入此角色 --</option>
+              ${currentSpeakersList
+                .map(
+                  (cur) =>
+                    `<option value="${escapeAttr(cur)}" ${cur === bestMatch ? "selected" : ""}>👉 映射为当前小说：${escapeHtml(cur)}</option>`,
+                )
+                .join("")}
+            </select>
+          </td>
+        </tr>
+      `);
+    }
+
+    els.schemeMappingBody.innerHTML = rows.join("");
+    openModal("schemeImportModal");
+  }
+
+  function handleConfirmImportScheme() {
+    if (!state.pendingImportScheme) return;
+    const mapping = {};
+    const rows = els.schemeMappingBody.querySelectorAll("tr[data-scheme-char]");
+    rows.forEach((row) => {
+      const schemeChar = row.dataset.schemeChar;
+      const select = row.querySelector(".scheme-target-select");
+      if (select && select.value) {
+        mapping[schemeChar] = select.value;
+      }
+    });
+
+    applySchemePayload(state.pendingImportScheme, mapping);
+    closeModal("schemeImportModal");
+    toast(`已成功将配音树导入并应用到当前小说中！`);
+  }
+
+  /* -------------------------------------------------------------
+     微软语音分类角色树库 (Microsoft Voice Tree Catalog)
+  ------------------------------------------------------------- */
+  function openVoiceCatalog(targetSpeaker = null) {
+    state.catalogTargetSpeaker = targetSpeaker;
+    if (targetSpeaker) {
+      els.catalogTargetNotice.hidden = false;
+      els.catalogTargetCharName.textContent = targetSpeaker;
+    } else {
+      els.catalogTargetNotice.hidden = true;
+    }
+
+    renderCatalogCategories();
+    renderCatalogVoices();
+    openModal("msVoiceModal");
+  }
+
+  function renderCatalogCategories() {
+    const current = state.catalogFilter.category;
+    els.catalogCategoryList.innerHTML = Object.entries(MS_VOICE_TREE)
+      .map(([key, item]) => {
+        const count = key === "all" ? MS_VOICE_CATALOG.length : MS_VOICE_CATALOG.filter((v) => v.category === key).length;
+        const activeClass = current === key ? "is-active" : "";
+        return `
+          <li class="catalog-category-item ${activeClass}" data-category="${escapeAttr(key)}">
+            <span>${escapeHtml(item.label)}</span>
+            <span class="cat-count">(${count})</span>
+          </li>
+        `;
+      })
+      .join("");
+
+    els.catalogCategoryList.querySelectorAll(".catalog-category-item").forEach((item) => {
+      item.addEventListener("click", () => {
+        state.catalogFilter.category = item.dataset.category;
+        renderCatalogCategories();
+        renderCatalogVoices();
+      });
+    });
+  }
+
+  function renderCatalogVoices() {
+    const { category, gender, query } = state.catalogFilter;
+    let list = MS_VOICE_CATALOG;
+
+    if (category && category !== "all") {
+      list = list.filter((v) => v.category === category);
+    }
+    if (gender && gender !== "all") {
+      list = list.filter((v) => v.gender === gender);
+    }
+    if (query) {
+      list = list.filter((v) => {
+        const full = `${v.name} ${v.fullName} ${v.archetype} ${v.tags.join(" ")} ${v.categoryLabel}`.toLowerCase();
+        return full.includes(query);
+      });
+    }
+
+    if (!list.length) {
+      els.catalogVoiceGrid.innerHTML = '<div class="empty-state">未找到匹配的微软音色。</div>';
+      return;
+    }
+
+    const currentSetting = state.catalogTargetSpeaker ? state.speakerSettings.get(state.catalogTargetSpeaker) : null;
+    const currentVoiceId = currentSetting?.voiceName || "";
+
+    els.catalogVoiceGrid.innerHTML = list
+      .map((voice) => {
+        const isCurrent = voice.id === currentVoiceId;
+        const genderClass = voice.gender === "male" ? "char-badge-gender-male" : "char-badge-gender-female";
+        const genderIcon = voice.gender === "male" ? "♂ 男" : "♀ 女";
+
+        return `
+          <div class="voice-card ${isCurrent ? "is-current" : ""}" data-voice-id="${escapeAttr(voice.id)}">
+            <div class="voice-card-head">
+              <div class="voice-card-name-group">
+                <span class="voice-card-name">${escapeHtml(voice.name)}</span>
+                <span class="char-badge ${genderClass}">${genderIcon}</span>
+                <span class="char-badge char-badge-role">${escapeHtml(voice.categoryLabel)}</span>
+              </div>
+            </div>
+            <div class="voice-card-archetype">${escapeHtml(voice.archetype)}</div>
+            <div class="voice-card-sample">“${escapeHtml(voice.sampleText)}”</div>
+            <div class="voice-card-styles">
+              ${voice.styles.slice(0, 4).map((s) => `<span class="voice-style-pill">${escapeHtml(STYLE_LABELS[s] || s)}</span>`).join("")}
+              ${voice.styles.length > 4 ? `<span class="voice-style-pill">+${voice.styles.length - 4}种情感</span>` : ""}
+            </div>
+            <div class="voice-card-footer">
+              <button class="secondary-button btn-sm" type="button" data-action="audition-catalog" data-voice-id="${escapeAttr(voice.id)}">🔊 试听</button>
+              <button class="primary-button btn-sm" type="button" data-action="select-catalog" data-voice-id="${escapeAttr(voice.id)}">
+                ${state.catalogTargetSpeaker ? `应用给【${state.catalogTargetSpeaker}】` : "选择此音色"}
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function handleCatalogVoiceClick(event) {
+    const btn = event.target.closest("button[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const voiceId = btn.dataset.voiceId;
+    const voice = MS_VOICE_MAP[voiceId];
+    if (!voice) return;
+
+    if (action === "audition-catalog") {
+      auditionVoiceDirect(voice, voice.sampleText);
+    } else if (action === "select-catalog") {
+      if (state.catalogTargetSpeaker) {
+        applyVoiceToCharacter(state.catalogTargetSpeaker, voice);
+        closeModal("msVoiceModal");
+        toast(`已将【${state.catalogTargetSpeaker}】的音色设置为【${voice.name} (${voice.id})】！`);
+      } else {
+        // No specific target, apply to narrator by default or prompt
+        applyVoiceToCharacter("旁白", voice);
+        closeModal("msVoiceModal");
+        toast(`已将旁白音色设置为【${voice.name} (${voice.id})】！`);
+      }
+    }
+  }
+
+  function applyVoiceToCharacter(speaker, voice) {
+    let setting = state.speakerSettings.get(speaker);
+    if (!setting) {
+      setting = {
+        speaker,
+        role: inferRole(speaker),
+        voiceName: voice.id,
+        pitch: voice.defaultPitch || 1.0,
+        rateOffset: voice.defaultRate || 0.0,
+        baseStyle: voice.styles[0] || "chat",
+      };
+      state.speakerSettings.set(speaker, setting);
+    } else {
+      setting.voiceName = voice.id;
+      if (voice.defaultPitch) setting.pitch = voice.defaultPitch;
+      if (typeof voice.defaultRate === "number") setting.rateOffset = voice.defaultRate;
+      if (voice.styles && !voice.styles.includes(setting.baseStyle)) {
+        setting.baseStyle = voice.styles[0] || "chat";
+      }
+    }
+    renderVoiceTree();
+  }
+
+  /* -------------------------------------------------------------
+     角色音色对调互换与快速移植 (Swap & Transfer Dialog)
+  ------------------------------------------------------------- */
+  function openSwapTransferModal(tab = "swap", preselectChar = null) {
+    const speakers = currentSpeakers();
+    if (speakers.length < 2 && tab === "swap") {
+      toast("当前小说识别到的角色少于 2 个，暂无法进行角色互换。");
+      return;
+    }
+
+    // Populate swap selects
+    const aOptions = speakers.map((s) => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join("");
+    els.swapSelectA.innerHTML = aOptions;
+    els.swapSelectB.innerHTML = aOptions;
+
+    if (preselectChar && speakers.includes(preselectChar)) {
+      els.swapSelectA.value = preselectChar;
+      const other = speakers.find((s) => s !== preselectChar) || speakers[0];
+      els.swapSelectB.value = other;
+    } else {
+      els.swapSelectA.value = speakers[0];
+      els.swapSelectB.value = speakers[1] || speakers[0];
+    }
+
+    // Populate transfer selects
+    els.transferSourceSelect.innerHTML = aOptions;
+    els.transferTargetSelect.innerHTML = aOptions;
+    if (preselectChar && speakers.includes(preselectChar)) {
+      els.transferSourceSelect.value = preselectChar;
+      const other = speakers.find((s) => s !== preselectChar) || speakers[0];
+      els.transferTargetSelect.value = other;
+    } else {
+      els.transferSourceSelect.value = speakers[0];
+      els.transferTargetSelect.value = speakers[1] || speakers[0];
+    }
+
+    switchSwapTab(tab);
+    updateSwapPreview();
+    openModal("swapTransferModal");
+  }
+
+  function switchSwapTab(tab) {
+    if (tab === "swap") {
+      els.tabSwapBtn.classList.add("is-active");
+      els.tabTransferBtn.classList.remove("is-active");
+      els.tabSwapContent.hidden = false;
+      els.tabTransferContent.hidden = true;
+    } else {
+      els.tabSwapBtn.classList.remove("is-active");
+      els.tabTransferBtn.classList.add("is-active");
+      els.tabSwapContent.hidden = true;
+      els.tabTransferContent.hidden = false;
+    }
+  }
+
+  function updateSwapPreview() {
+    const charA = els.swapSelectA.value;
+    const charB = els.swapSelectB.value;
+    if (charA === charB) {
+      els.swapPreviewArea.innerHTML = `<span style="color:var(--red);">⚠️ 请选择两个不同的角色进行音色对调。</span>`;
+      els.confirmSwapBtn.disabled = true;
+      return;
+    }
+    els.confirmSwapBtn.disabled = false;
+    const setA = state.speakerSettings.get(charA);
+    const setB = state.speakerSettings.get(charB);
+    const voiceA = MS_VOICE_MAP[setA?.voiceName]?.name || setA?.voiceName || "默认";
+    const voiceB = MS_VOICE_MAP[setB?.voiceName]?.name || setB?.voiceName || "默认";
+
+    els.swapPreviewArea.innerHTML = `
+      <div><strong>对调后：</strong></div>
+      <div>• 【${escapeHtml(charA)}】将换为：<strong>${escapeHtml(voiceB)}</strong> (原${escapeHtml(charB)}的音色、语调与风格)</div>
+      <div>• 【${escapeHtml(charB)}】将换为：<strong>${escapeHtml(voiceA)}</strong> (原${escapeHtml(charA)}的音色、语调与风格)</div>
+    `;
+  }
+
+  function handleConfirmSwap() {
+    const charA = els.swapSelectA.value;
+    const charB = els.swapSelectB.value;
+    if (charA === charB) return;
+
+    const setA = state.speakerSettings.get(charA);
+    const setB = state.speakerSettings.get(charB);
+    if (!setA || !setB) return;
+
+    // Swap acoustic attributes while retaining identities
+    const tempVoice = setA.voiceName;
+    const tempPitch = setA.pitch;
+    const tempRate = setA.rateOffset;
+    const tempStyle = setA.baseStyle;
+
+    setA.voiceName = setB.voiceName;
+    setA.pitch = setB.pitch;
+    setA.rateOffset = setB.rateOffset;
+    setA.baseStyle = setB.baseStyle;
+
+    setB.voiceName = tempVoice;
+    setB.pitch = tempPitch;
+    setB.rateOffset = tempRate;
+    setB.baseStyle = tempStyle;
+
+    renderVoiceTree();
+    closeModal("swapTransferModal");
+    toast(`已成功互换【${charA}】与【${charB}】的配音树配置！`);
+  }
+
+  function handleConfirmTransfer() {
+    const srcChar = els.transferSourceSelect.value;
+    const srcSetting = state.speakerSettings.get(srcChar);
+    if (!srcSetting) return;
+
+    const mode = document.querySelector('input[name="transferTargetMode"]:checked')?.value || "single";
+    const currentList = currentSpeakers();
+    let targets = [];
+
+    if (mode === "single") {
+      const dst = els.transferTargetSelect.value;
+      if (dst === srcChar) {
+        toast("源角色与目标角色不能相同。");
+        return;
+      }
+      targets = [dst];
+    } else if (mode === "same-gender") {
+      const srcGender = inferGender(srcChar);
+      targets = currentList.filter((c) => c !== srcChar && inferGender(c) === srcGender);
+      if (!targets.length) {
+        toast(`未找到其他同性别角色。`);
+        return;
+      }
+    } else if (mode === "all") {
+      targets = currentList.filter((c) => c !== srcChar);
+    }
+
+    targets.forEach((dst) => {
+      const targetSetting = state.speakerSettings.get(dst);
+      if (targetSetting) {
+        targetSetting.voiceName = srcSetting.voiceName;
+        targetSetting.pitch = srcSetting.pitch;
+        targetSetting.rateOffset = srcSetting.rateOffset;
+        targetSetting.baseStyle = srcSetting.baseStyle;
+      }
+    });
+
+    renderVoiceTree();
+    closeModal("swapTransferModal");
+    toast(`已将【${srcChar}】的音色成功移植给 ${targets.length} 位角色！`);
+  }
+
+  /* -------------------------------------------------------------
+     小说角色搭配树可视化卡片区渲染 (Character Voice Tree)
+  ------------------------------------------------------------- */
+  function renderVoiceTree() {
+    if (!els.characterVoiceTree) return;
+    const speakers = currentSpeakers();
+    if (!speakers.length) {
+      els.characterVoiceTree.innerHTML = '<div class="empty-state">导入小说文本后，将自动识别人物并构建角色语音搭配树。</div>';
+      return;
+    }
+
+    // Calculate line counts per speaker
+    const lineStats = {};
+    speakers.forEach((s) => { lineStats[s] = 0; });
+    state.chapters.forEach((chapter) => {
+      extractSegments(chapter.text).forEach((seg) => {
+        if (seg.speaker && lineStats[seg.speaker] !== undefined) {
+          lineStats[seg.speaker] += 1;
+        }
+      });
+    });
+
+    // Grouping
+    const groups = {
+      narrator: { title: "🎙️ 旁白演播组", items: [] },
+      protagonist: { title: "👑 核心主役组", items: [] },
+      supporting: { title: "👥 登场配角组", items: [] },
+    };
+
+    speakers.forEach((speaker) => {
+      const setting = state.speakerSettings.get(speaker) || {
+        speaker,
+        role: inferRole(speaker),
+        voiceName: "zh-CN-YunxiNeural",
+        pitch: 1.0,
+        rateOffset: 0.0,
+        baseStyle: "chat",
+      };
+
+      if (speaker === "旁白") {
+        groups.narrator.items.push({ speaker, setting, count: lineStats[speaker] || 0 });
+      } else if (["youngMale", "youngFemale"].includes(setting.role) || (lineStats[speaker] || 0) >= 3) {
+        groups.protagonist.items.push({ speaker, setting, count: lineStats[speaker] || 0 });
+      } else {
+        groups.supporting.items.push({ speaker, setting, count: lineStats[speaker] || 0 });
+      }
+    });
+
+    // Render tree cards HTML
+    let html = "";
+    Object.values(groups).forEach((group) => {
+      if (!group.items.length) return;
+      html += `
+        <div class="tree-group">
+          <div class="tree-group-header">
+            <span class="tree-group-title">${escapeHtml(group.title)}</span>
+            <span class="tree-group-count">${group.items.length} 个角色</span>
+          </div>
+          <div class="tree-cards-list">
+            ${group.items.map((item) => renderTreeCard(item.speaker, item.setting, item.count)).join("")}
+          </div>
+        </div>
+      `;
+    });
+
+    els.characterVoiceTree.innerHTML = html;
+  }
+
+  function renderTreeCard(speaker, setting, count) {
+    const msVoice = MS_VOICE_MAP[setting.voiceName] || {
+      name: setting.voiceName || "默认音色",
+      categoryLabel: "通用",
+      styles: ["chat", "narration-relaxed", "cheerful", "serious", "angry", "sad", "fearful"],
+    };
+
+    const gender = inferGender(speaker);
+    const genderClass = gender === "male" ? "char-badge-gender-male" : "char-badge-gender-female";
+    const genderIcon = gender === "male" ? "♂ 男" : "♀ 女";
+
+    // Style dropdown options
+    const styles = msVoice.styles || ["chat", "narration-relaxed", "cheerful", "serious", "angry", "sad"];
+    const styleOptions = styles
+      .map(
+        (s) =>
+          `<option value="${escapeAttr(s)}" ${setting.baseStyle === s ? "selected" : ""}>${escapeHtml(STYLE_LABELS[s] || s)}</option>`,
+      )
+      .join("");
+
+    return `
+      <div class="tree-card" data-speaker="${escapeAttr(speaker)}">
+        <div class="tree-card-header">
+          <div class="tree-card-title-box">
+            <span class="tree-char-name">${escapeHtml(speaker)}</span>
+            <span class="char-badge ${genderClass}">${genderIcon}</span>
+            <select class="text-input text-input-sm card-role-select" data-field="role" title="调整角色类型">
+              ${Object.entries(ROLE_LABELS)
+                .map(
+                  ([val, label]) =>
+                    `<option value="${val}" ${setting.role === val ? "selected" : ""}>${label}</option>`,
+                )
+                .join("")}
+            </select>
+          </div>
+          <span class="char-badge-count">发言 ${count} 处</span>
+        </div>
+
+        <div class="tree-card-voice-info">
+          <div class="current-voice-tag">
+            <span>音色:</span>
+            <span class="current-voice-name">微软 · ${escapeHtml(msVoice.name)}</span>
+          </div>
+          <select class="text-input text-input-sm card-style-select" data-field="style" title="情感演绎风格">
+            ${styleOptions}
+          </select>
+        </div>
+
+        <div class="tree-card-sliders">
+          <label class="mini-slider">
+            音高: <strong>${Number(setting.pitch).toFixed(2)}</strong>
+            <input type="range" min="0.5" max="1.8" step="0.05" value="${setting.pitch}" data-field="pitch" />
+          </label>
+          <label class="mini-slider">
+            微调语速: <strong>${Number(setting.rateOffset) >= 0 ? "+" : ""}${Number(setting.rateOffset).toFixed(2)}</strong>
+            <input type="range" min="-0.3" max="0.3" step="0.05" value="${setting.rateOffset}" data-field="rateOffset" />
+          </label>
+        </div>
+
+        <div class="tree-card-actions">
+          <button class="secondary-button card-btn-sm" type="button" data-action="audition-character">🔊 试听</button>
+          <button class="primary-button card-btn-sm" type="button" data-action="change-voice">🎨 换微软音色</button>
+          <button class="ghost-button card-btn-sm" type="button" data-action="swap-character">🔄 互换</button>
+          <button class="ghost-button card-btn-sm" type="button" data-action="transfer-character">📋 移植到...</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function handleVoiceTreeClick(event) {
+    const btn = event.target.closest("button[data-action]");
+    if (!btn) return;
+    const card = btn.closest(".tree-card");
+    const speaker = card ? card.dataset.speaker : null;
+    if (!speaker) return;
+
+    const action = btn.dataset.action;
+    if (action === "audition-character") {
+      auditionCharacterSpeaker(speaker);
+    } else if (action === "change-voice") {
+      openVoiceCatalog(speaker);
+    } else if (action === "swap-character") {
+      openSwapTransferModal("swap", speaker);
+    } else if (action === "transfer-character") {
+      openSwapTransferModal("transfer", speaker);
+    }
+  }
+
+  function handleVoiceTreeChange(event) {
+    const card = event.target.closest(".tree-card");
+    if (!card) return;
+    const speaker = card.dataset.speaker;
+    const setting = state.speakerSettings.get(speaker);
+    if (!setting) return;
+
+    const field = event.target.dataset.field;
+    if (field === "role") {
+      setting.role = event.target.value;
+      const preset = ROLE_DEFAULTS[setting.role];
+      if (preset) {
+        setting.voiceName = preset.defaultVoice;
+        setting.pitch = preset.pitch;
+        setting.rateOffset = preset.rateOffset;
+      }
+      renderVoiceTree();
+    } else if (field === "style") {
+      setting.baseStyle = event.target.value;
+    }
+  }
+
+  function handleVoiceTreeInput(event) {
+    const card = event.target.closest(".tree-card");
+    if (!card) return;
+    const speaker = card.dataset.speaker;
+    const setting = state.speakerSettings.get(speaker);
+    if (!setting) return;
+
+    const field = event.target.dataset.field;
+    if (field === "pitch") {
+      setting.pitch = Number(event.target.value);
+      const strong = event.target.closest("label").querySelector("strong");
+      if (strong) strong.textContent = Number(event.target.value).toFixed(2);
+    } else if (field === "rateOffset") {
+      setting.rateOffset = Number(event.target.value);
+      const strong = event.target.closest("label").querySelector("strong");
+      if (strong) strong.textContent = `${Number(event.target.value) >= 0 ? "+" : ""}${Number(event.target.value).toFixed(2)}`;
+    }
+  }
+
+  /* -------------------------------------------------------------
+     试听功能 (Audition Engine)
+  ------------------------------------------------------------- */
+  function auditionCharacterSpeaker(speaker) {
+    if (!isSpeechSupported()) {
+      toast("当前浏览器不支持 Web Speech 试听功能。");
+      return;
+    }
+
+    const setting = state.speakerSettings.get(speaker);
+    if (!setting) return;
+
+    // Find a dialogue line from this character if possible, or fall back to template
+    let line = "";
+    for (const ch of state.chapters) {
+      const seg = extractSegments(ch.text).find((s) => s.speaker === speaker && s.text.length >= 6);
+      if (seg) {
+        line = seg.text;
+        break;
+      }
+    }
+
+    const msVoice = MS_VOICE_MAP[setting.voiceName];
+    const textToSpeak = line || (msVoice ? msVoice.sampleText : `我是${speaker}，这是我的音色配音效果。`);
+
+    auditionVoiceDirect(msVoice, textToSpeak, setting.pitch, setting.rateOffset, setting.baseStyle);
+    toast(`正在试听【${speaker}】的配音效果...`);
+  }
+
+  function auditionVoiceDirect(msVoice, text, customPitch = null, customRateOffset = null, style = "chat") {
+    if (!isSpeechSupported()) {
+      toast("当前浏览器不支持语音合成试听。");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const resolvedVoice = resolveBrowserVoiceForMsVoice(msVoice);
+    if (resolvedVoice) {
+      utterance.voice = resolvedVoice;
+      utterance.lang = resolvedVoice.lang || "zh-CN";
+    } else {
+      utterance.lang = "zh-CN";
+    }
+
+    const pitchVal = customPitch !== null ? customPitch : (msVoice?.defaultPitch || 1.0);
+    const rateOffsetVal = customRateOffset !== null ? customRateOffset : (msVoice?.defaultRate || 0.0);
+    const emotion = emotionAdjustment(style);
+
+    utterance.pitch = clamp(pitchVal + emotion.pitch, 0.1, 2.0);
+    utterance.rate = clamp(Number(els.rateSlider.value) + rateOffsetVal + emotion.rate, 0.5, 2.0);
+    utterance.volume = 1.0;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function resolveBrowserVoiceForMsVoice(msVoice) {
+    if (!state.voices.length) return null;
+    const keywords = [];
+    if (msVoice) {
+      keywords.push(msVoice.name);
+      keywords.push(msVoice.fullName.replace("zh-CN-", "").replace("Neural", ""));
+    }
+    const chineseVoices = state.voices.filter((v) => {
+      const val = `${v.name} ${v.lang}`.toLowerCase();
+      return val.includes("zh") || val.includes("chinese") || val.includes("中文") || val.includes("普通话");
+    });
+    const pool = chineseVoices.length ? chineseVoices : state.voices;
+    for (const kw of keywords) {
+      const match = pool.find((v) => v.name.toLowerCase().includes(kw.toLowerCase()));
+      if (match) return match;
+    }
+    return pool[0] || null;
+  }
+
+  /* -------------------------------------------------------------
+     弹窗通用交互 (Modal Utilities)
+  ------------------------------------------------------------- */
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  /* -------------------------------------------------------------
+     核心业务逻辑 (Text Processing, Chapters, Speech Settings)
+  ------------------------------------------------------------- */
   async function handleFileImport(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
 
     const lowerName = file.name.toLowerCase();
+    if (lowerName.endsWith(".epub")) {
+      setImportStatus("正在解析 EPUB 电子书");
+      try {
+        toast(`📖 正在解析 EPUB 电子书《${file.name}》...`);
+        const res = await fetch("http://127.0.0.1:8768/api/novel/parse-epub", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            epub_base64: await new Promise((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(r.result);
+              r.onerror = reject;
+              r.readAsDataURL(file);
+            }),
+            filename: file.name,
+          }),
+        });
+        const result = await res.json();
+        if (result.status === "ok") {
+          els.rawText.value = result.full_text;
+          els.bookTitle.value = result.title;
+          setImportStatus(`EPUB 已解析 (${result.total_chapters} 章)`);
+          toast(`✅ 成功解析 EPUB《${result.title}》：已提取 ${result.total_chapters} 个章节！`);
+          handleParse();
+        } else {
+          throw new Error(result.message || "EPUB 解析错误");
+        }
+      } catch (error) {
+        setImportStatus("EPUB 解析失败");
+        toast(`EPUB 解析失败：${friendlyError(error)}`);
+      }
+      return;
+    }
+
     if (!lowerName.endsWith(".txt") && !lowerName.endsWith(".md")) {
-      toast("仅支持 .txt / .md 文件。EPUB 请先用桌面项目或阅读器导出为文本。");
+      toast("支持 .epub / .txt / .md 文件。");
       event.target.value = "";
       return;
     }
@@ -222,7 +1658,7 @@
       rebuildSpeakerSettings();
       renderAll();
       setImportStatus(`已识别 ${state.chapters.length} 章`);
-      toast(`已识别 ${state.chapters.length} 个章节，可继续调整分割点。`);
+      toast(`已识别 ${state.chapters.length} 个章节，角色语音树已智能匹配！`);
     } catch (error) {
       setImportStatus("识别失败");
       toast(`章节识别失败：${friendlyError(error)}`);
@@ -348,7 +1784,7 @@
 
   function renderAll() {
     renderChapters();
-    renderVoiceTable();
+    renderVoiceTree();
     updateProgressSummary();
     updateSupportStatus();
   }
@@ -436,75 +1872,43 @@
     updateProgressSummary();
   }
 
-  function renderVoiceTable() {
-    const speakers = currentSpeakers();
-    if (!speakers.length) {
-      els.voiceTable.innerHTML = '<div class="empty-state">导入文本后自动匹配角色。</div>';
-      return;
-    }
-
-    els.voiceTable.innerHTML = speakers
-      .map((speaker) => {
-        const setting = state.speakerSettings.get(speaker);
-        return `
-          <div class="voice-row" data-speaker="${escapeAttr(speaker)}">
-            <div class="speaker-name" title="${escapeAttr(speaker)}">${escapeHtml(speaker)}</div>
-            <select class="text-input" data-field="role" aria-label="${escapeAttr(speaker)}角色类型">
-              ${Object.entries(ROLE_LABELS)
-                .map(
-                  ([value, label]) =>
-                    `<option value="${value}" ${setting.role === value ? "selected" : ""}>${label}</option>`,
-                )
-                .join("")}
-            </select>
-            <select class="text-input" data-field="voice" aria-label="${escapeAttr(speaker)}浏览器音色">
-              ${voiceOptions(setting.voiceName)}
-            </select>
-            <div class="micro-controls">
-              <label class="mini-slider">音高 ${Number(setting.pitch).toFixed(2)}
-                <input type="range" min="0.5" max="1.8" step="0.05" value="${setting.pitch}" data-field="pitch" />
-              </label>
-              <label class="mini-slider">角色语速 ${Number(setting.rateOffset).toFixed(2)}
-                <input type="range" min="-0.3" max="0.3" step="0.05" value="${setting.rateOffset}" data-field="rateOffset" />
-              </label>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
-  }
-
-  function voiceOptions(selectedVoiceName) {
-    if (!state.voices.length) {
-      return '<option value="">浏览器尚未返回音色</option>';
-    }
-    return state.voices
-      .map((voice) => {
-        const label = `${voice.name}${voice.lang ? ` · ${voice.lang}` : ""}`;
-        return `<option value="${escapeAttr(voice.name)}" ${voice.name === selectedVoiceName ? "selected" : ""}>${escapeHtml(label)}</option>`;
-      })
-      .join("");
-  }
-
   function rebuildSpeakerSettings() {
     const speakers = currentSpeakers();
     const next = new Map();
-    speakers.forEach((speaker, index) => {
+    speakers.forEach((speaker) => {
       const existing = state.speakerSettings.get(speaker);
       if (existing) {
         next.set(speaker, existing);
         return;
       }
       const role = inferRole(speaker);
+      const matchedVoice = chooseDefaultMsVoice(speaker, role);
       next.set(speaker, {
         speaker,
         role,
-        voiceName: chooseVoiceName(role, index),
-        pitch: ROLE_DEFAULTS[role].pitch,
-        rateOffset: ROLE_DEFAULTS[role].rateOffset,
+        voiceName: matchedVoice.id,
+        pitch: matchedVoice.defaultPitch || 1.0,
+        rateOffset: matchedVoice.defaultRate || 0.0,
+        baseStyle: matchedVoice.styles[0] || "chat",
       });
     });
     state.speakerSettings = next;
+  }
+
+  function chooseDefaultMsVoice(speaker, role) {
+    // Specific character name match heuristics
+    if (speaker === "旁白") return MS_VOICE_MAP["zh-CN-YunxiNeural"];
+    if (/刘备|玄德|曹操|将|帅|侯|帝|王|霸/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunyeNeural"];
+    if (/诸葛|亮|孔明|生|生|仙|墨|文/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunfengNeural"];
+    if (/张飞|李逵|武松|猛|暴|狂/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunyeNeural"];
+    if (/关羽|云长|关公/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunzeNeural"];
+    if (/老|翁|祖|仙翁|魔|邪|贼|奸/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunzeNeural"];
+    if (/童|娃|儿|小/.test(speaker)) return MS_VOICE_MAP["zh-CN-YunxiaNeural"];
+    if (/夫人|小姐|姑娘|女|仙子|妹|姐|妻|妃/.test(speaker)) return MS_VOICE_MAP["zh-CN-XiaohanNeural"];
+
+    // Match by role
+    const defaultId = ROLE_DEFAULTS[role]?.defaultVoice || "zh-CN-YunjieNeural";
+    return MS_VOICE_MAP[defaultId] || MS_VOICE_CATALOG[0];
   }
 
   function currentSpeakers() {
@@ -520,24 +1924,20 @@
   }
 
   function inferRole(speaker) {
-    if (speaker === "旁白") return "narratorMale";
-    if (/夫人|小姐|姑娘|女|母|妻|姬|妃|她|妹|姐/.test(speaker)) return "youngFemale";
-    if (/老|翁|父|叔|伯|卓|操|贼|魔|王/.test(speaker)) return "elderVillain";
+    if (speaker === "旁白") return "narrator";
+    if (/童|幼|孩|小妹|正太|萝莉/.test(speaker)) return "child";
+    if (/夫人|小姐|姑娘|女|母|妻|姬|妃|她|妹|姐|仙子|丫鬟/.test(speaker)) {
+      return /母|太后|老妇|掌门|主母/.test(speaker) ? "mature" : "youngFemale";
+    }
+    if (/老|翁|父|祖|魔|邪|贼|奸|宿敌|怪/.test(speaker)) return "elderVillain";
+    if (/叔|伯|将|侯|公|帝|王|掌门|宗师|师兄|大哥/.test(speaker)) return "mature";
     return "youngMale";
   }
 
-  function chooseVoiceName(role, offset = 0) {
-    if (!state.voices.length) return "";
-    const chineseVoices = state.voices.filter((voice) => {
-      const value = `${voice.name} ${voice.lang}`.toLowerCase();
-      return value.includes("zh") || value.includes("chinese") || value.includes("中文") || value.includes("普通话");
-    });
-    const pool = chineseVoices.length ? chineseVoices : state.voices;
-    const keywords = ROLE_DEFAULTS[role].keywords;
-    const matched = pool.find((voice) =>
-      keywords.some((keyword) => `${voice.name} ${voice.lang}`.toLowerCase().includes(keyword.toLowerCase())),
-    );
-    return (matched || pool[offset % pool.length]).name;
+  function inferGender(speaker) {
+    if (speaker === "旁白") return "male";
+    if (/夫人|小姐|姑娘|女|母|妻|姬|妃|她|妹|姐|仙子|丫鬟|妇|娘/.test(speaker)) return "female";
+    return "male";
   }
 
   function refreshVoices() {
@@ -565,7 +1965,7 @@
     } else if (mode === "browser-record") {
       els.modeNotice.textContent = "生成时会请求捕获当前标签页音频，并把朗读录制为 WAV。若浏览器未提供标签页音频捕获，将提示暂不支持。";
     } else {
-      els.modeNotice.textContent = "在线接口会收到章节分批文本与角色音色设置，并需返回 audio/mpeg 或 audio/wav。接口鉴权令牌只保存在当前页面输入框。";
+      els.modeNotice.textContent = "在线接口支持直接将微软角色音色树（音色ID、音高、语速、情感风格）POST至后端服务，生成高保真 MP3/WAV。";
     }
   }
 
@@ -614,38 +2014,6 @@
       scheduleVoiceRefresh();
     }
     updateProgressSummary();
-  }
-
-  function handleVoiceChange(event) {
-    const row = event.target.closest(".voice-row");
-    if (!row) return;
-    const speaker = row.dataset.speaker;
-    const setting = state.speakerSettings.get(speaker);
-    if (!setting) return;
-    const field = event.target.dataset.field;
-    if (!field) return;
-
-    if (field === "role") {
-      setting.role = event.target.value;
-      const defaults = ROLE_DEFAULTS[setting.role];
-      setting.pitch = defaults.pitch;
-      setting.rateOffset = defaults.rateOffset;
-      setting.voiceName = chooseVoiceName(setting.role);
-      renderVoiceTable();
-      return;
-    }
-
-    if (field === "voice") setting.voiceName = event.target.value;
-    if (field === "pitch") setting.pitch = Number(event.target.value);
-    if (field === "rateOffset") setting.rateOffset = Number(event.target.value);
-
-    if (field === "pitch" || field === "rateOffset") {
-      const label = event.target.closest(".mini-slider");
-      if (label) {
-        const text = field === "pitch" ? "音高" : "角色语速";
-        label.childNodes[0].nodeValue = `${text} ${Number(event.target.value).toFixed(2)} `;
-      }
-    }
   }
 
   function selectChapters(selected) {
@@ -929,6 +2297,15 @@
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    const voiceSettingsPayload = Array.from(state.speakerSettings.values()).map((s) => ({
+      speaker: s.speaker,
+      role: s.role,
+      voice_name: s.voiceName,
+      pitch: s.pitch,
+      rate_offset: `${s.rateOffset >= 0 ? "+" : ""}${Math.round(s.rateOffset * 100)}%`,
+      base_style: s.baseStyle || "chat",
+    }));
+
     const response = await fetch(els.endpointUrl.value.trim(), {
       method: "POST",
       headers,
@@ -942,7 +2319,7 @@
         output_format: els.onlineFormat.value,
         rate: Number(els.rateSlider.value),
         speaker_mode: els.speakerModeToggle.checked,
-        voice_settings: Array.from(state.speakerSettings.values()),
+        voice_settings: voiceSettingsPayload,
         segments,
       }),
     });
@@ -1133,15 +2510,17 @@
 
   function applyUtteranceSettings(utterance, item) {
     const setting = state.speakerSettings.get(item.speaker) || state.speakerSettings.get("旁白");
-    const voice = setting ? state.voices.find((candidate) => candidate.name === setting.voiceName) : null;
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang || "zh-CN";
+    const msVoice = MS_VOICE_MAP[setting?.voiceName];
+    const resolvedVoice = resolveBrowserVoiceForMsVoice(msVoice);
+
+    if (resolvedVoice) {
+      utterance.voice = resolvedVoice;
+      utterance.lang = resolvedVoice.lang || "zh-CN";
     } else {
       utterance.lang = "zh-CN";
     }
 
-    const emotion = emotionAdjustment(item.emotion);
+    const emotion = emotionAdjustment(item.emotion || setting?.baseStyle);
     utterance.rate = clamp(Number(els.rateSlider.value) + (setting?.rateOffset || 0) + emotion.rate, 0.5, 2);
     utterance.pitch = clamp((setting?.pitch || 1) + emotion.pitch, 0.1, 2);
     utterance.volume = 1;
@@ -1598,7 +2977,7 @@
     clearTimeout(state.refreshTimer);
     state.refreshTimer = setTimeout(() => {
       rebuildSpeakerSettings();
-      renderVoiceTable();
+      renderVoiceTree();
     }, 350);
   }
 

@@ -65,6 +65,7 @@ class AppConfig:
     input_encoding: str
     chapter_limit: int
     chapter_min_chars: int
+    voice_scheme: str | None
     loaded_env_files: tuple[Path, ...]
 
     @property
@@ -352,5 +353,6 @@ def load_config(base_dir: Path | None = None, env_file: Path | None = None) -> A
         input_encoding=os.getenv("NOVEL_TTS_INPUT_ENCODING", "auto"),
         chapter_limit=_int_env("NOVEL_TTS_CHAPTER_LIMIT", 0),
         chapter_min_chars=_int_env("NOVEL_TTS_CHAPTER_MIN_CHARS", 500),
+        voice_scheme=_clean_env("NOVEL_TTS_VOICE_SCHEME"),
         loaded_env_files=loaded_env_files,
     )

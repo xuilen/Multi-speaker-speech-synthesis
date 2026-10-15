@@ -15,7 +15,12 @@ if __package__ in {None, ""}:
 
 from novel_tts_system.audio.merger import AudioMerger, pydub_available
 from novel_tts_system.config import AppConfig, load_config
-from novel_tts_system.processor.character_registry import CharacterRegistry
+from novel_tts_system.processor.character_registry import (
+    BUILTIN_VOICE_SCHEMES,
+    MS_VOICE_CATALOG,
+    MS_VOICE_TREE,
+    CharacterRegistry,
+)
 from novel_tts_system.processor.character_planner import CharacterPlanner
 from novel_tts_system.processor.chunker import SlidingWindowChunker
 from novel_tts_system.processor.epub_reader import read_epub_text
@@ -136,6 +141,7 @@ def run_pipeline(
     config: AppConfig,
     force_heuristic: bool = False,
     dry_run: bool = False,
+    export_voice_scheme: Path | None = None,
 ) -> Path:
     """Run chunking, extraction, SSML creation, synthesis, and audio merging."""
 
@@ -154,6 +160,14 @@ def run_pipeline(
 
     extractor = LLMExtractor(config=config, force_heuristic=force_heuristic)
     registry = CharacterRegistry(config.registry_path, narrator_gender=config.narrator_gender)
+    if config.voice_scheme:
+        scheme_arg = config.voice_scheme.strip()
+        scheme_path = Path(scheme_arg)
+        if scheme_path.exists():
+            registry.import_scheme(scheme_path)
+        elif scheme_arg.lower() in BUILTIN_VOICE_SCHEMES:
+            registry.apply_builtin_scheme(scheme_arg.lower())
+
     if config.character_prepass_enabled:
         planned_characters = CharacterPlanner().plan_from_text(raw_text, config.character_prepass_chars)
         registry.sync_from_metadata(planned_characters)
@@ -216,6 +230,8 @@ def run_pipeline(
     manifest_path = config.output_dir / "extraction_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     registry.save()
+    if export_voice_scheme:
+        registry.export_scheme(export_voice_scheme)
 
     if dry_run:
         return manifest_path
@@ -387,6 +403,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--crossfade-ms", type=int, help="Crossfade duration between chunks.")
     parser.add_argument("--dynamic-pauses", action=argparse.BooleanOptionalAction, default=None, help="Use punctuation/emotion-aware pauses.")
     parser.add_argument("--tts-rate-limit-per-minute", type=int, help="Throttle TTS backend requests.")
+    parser.add_argument("--voice-scheme", help="Predefined novel voice scheme (xianxia, historical, romance, mystery) or JSON file path.")
+    parser.add_argument("--export-voice-scheme", type=Path, help="Export novel character voice tree as a JSON scheme file.")
+    parser.add_argument("--list-voice-schemes", action="store_true", help="Print available novel voice schemes and exit.")
+    parser.add_argument("--list-voices", action="store_true", help="Print the Microsoft voice catalog and exit.")
     return parser.parse_args(argv)
 
 
@@ -394,6 +414,25 @@ def main(argv: list[str] | None = None) -> int:
     """Run the command-line demo or file conversion."""
 
     args = parse_args(argv)
+
+    if args.list_voice_schemes:
+        print("\n=== 内置小说角色配音树方案 ===")
+        for key, scheme in BUILTIN_VOICE_SCHEMES.items():
+            print(f"- {key}: {scheme['name']} ({len(scheme['characters'])} 个角色配置)")
+            print(f"  说明: {scheme['description']}")
+        print()
+        return 0
+
+    if args.list_voices:
+        print("\n=== 微软语音角色分类树库 ===")
+        for cat_key, cat_data in MS_VOICE_TREE.items():
+            print(f"\n【{cat_data['label']}】({len(cat_data['voices'])} 个音色) - {cat_data['description']}")
+            for voice in cat_data["voices"]:
+                gender_str = "男" if voice["gender"] == "male" else "女"
+                print(f"  • {voice['name']} ({voice['fullName']}) [{gender_str}] {voice['archetype']}")
+        print()
+        return 0
+
     config = load_config(env_file=args.env_file)
     overrides: dict[str, object] = {}
     if args.registry:
@@ -432,6 +471,8 @@ def main(argv: list[str] | None = None) -> int:
         overrides["dynamic_pause_enabled"] = args.dynamic_pauses
     if args.tts_rate_limit_per_minute is not None:
         overrides["tts_rate_limit_per_minute"] = args.tts_rate_limit_per_minute
+    if args.voice_scheme:
+        overrides["voice_scheme"] = args.voice_scheme
     if overrides:
         config = replace(config, **overrides)
 
@@ -456,6 +497,7 @@ def main(argv: list[str] | None = None) -> int:
             config=config,
             force_heuristic=args.force_heuristic,
             dry_run=args.dry_run,
+            export_voice_scheme=args.export_voice_scheme,
         )
     except Exception as exc:
         print(f"Pipeline failed: {exc}", file=sys.stderr)
