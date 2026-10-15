@@ -25,14 +25,50 @@
 
 </div>
 
-## 视觉界面与工程架构预览
+## 视觉界面与工坊全景 (Visual Showcase)
 
 <div align="center">
-  <h3>🎛️ 专业 DAW 级小说制作工坊与多角色声线树</h3>
-  <img width="1280" alt="Visual Interface" src="https://github.com/user-attachments/assets/1a6ea666-b88c-48f4-81cb-03a242b9b818" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
-  <br><br>
-  <h3>🏛️ 系统端到端处理流水线架构</h3>
-  <img width="480" alt="Overall Architecture" src="https://github.com/user-attachments/assets/0d22818d-a1b3-4dd6-8c96-aa00b4d78a98" style="border-radius: 8px;" />
+  <h3>🎛️ PRTS-OS 沉浸式小说制作工坊主控台 (Studio Master Deck)</h3>
+  <p><i>单页面三栏模块化工作区 · 44.1kHz 实时示波器 · 章节剧本卡片 · 全局底栏同步提词机</i></p>
+  <img width="100%" alt="PRTS-OS Studio Dashboard" src="./docs/images/01_studio_dashboard.png" style="border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 229, 255, 0.15);" />
+</div>
+
+<br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td width="50%" align="center">
+        <b>🌲 题材声学雷达 & 角色音频树卡片矩阵 (Card Grid Matrix)</b><br>
+        <i>自适应多列网格排版 (高度压缩 65%) · 实时防抖检索 · ♂/♀专属边框标识</i><br><br>
+        <img width="100%" alt="Character Voice Tree Matrix" src="./docs/images/02_character_matrix.png" style="border-radius: 8px;" />
+      </td>
+      <td width="50%" align="center">
+        <b>🧬 角色音频树全屏深度检视 (View 02 Tree)</b><br>
+        <i>全景层级透视 · 声学基频(Pitch)/语速(Rate)微调 · 原著对白试听录</i><br><br>
+        <img width="100%" alt="Voice Tree Inspection" src="./docs/images/03_voice_tree.png" style="border-radius: 8px;" />
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" align="center">
+        <b>🔮 四位一体全音色素材宇宙 (View 03 Library)</b><br>
+        <i>微软官方 / AI 漫剧 / 开源大模型 / 自建树 · 拖拽混搭台 · 实时示波监听</i><br><br>
+        <img width="100%" alt="Voice Library & Material Universe" src="./docs/images/04_voice_library.png" style="border-radius: 8px;" />
+      </td>
+      <td width="50%" align="center">
+        <b>🧭 选定章节精配台 (Chapter Focus Deck)</b><br>
+        <i>单章深度精修 · 逐句对白走带 · 说话人智能过滤 · 独立试听导出</i><br><br>
+        <img width="100%" alt="Chapter Focus Deck" src="./docs/images/05_chapter_focus_deck.png" style="border-radius: 8px;" />
+      </td>
+    </tr>
+  </table>
+</div>
+
+<br>
+
+<div align="center">
+  <h3>🏛️ 端到端数据处理流水线架构</h3>
+  <img width="65%" alt="Overall Architecture" src="./docs/images/00_architecture_diagram.png" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);" />
 </div>
 
 ---
